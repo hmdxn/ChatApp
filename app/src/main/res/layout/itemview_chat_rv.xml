@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/sms_row"
+    android:paddingBottom="5dp">
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/chat_view"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.CardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:layout_marginStart="@dimen/card_margin_start"
+                android:layout_marginEnd="@dimen/card_margin_end"
+                android:layout_marginBottom="@dimen/card_chat_margin_btm"
+                app:cardCornerRadius="@dimen/card_chat_corner_radius"
+                android:elevation="@dimen/card_elevation"
+                android:id="@+id/chatBubble">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/username_tv"
+                        android:text="tronography"
+                        android:textSize="@dimen/sender_id_text_size"
+                        android:textStyle="bold"
+                        android:layout_marginStart="@dimen/card_margin_start"
+                        android:layout_marginEnd="@dimen/sms_rv_margin_end"
+                        />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/message_tv"
+                        android:text="Sample message"
+                        android:textSize="@dimen/default_text_size"
+                        android:gravity="start"
+                        android:layout_marginStart="@dimen/card_margin_start"
+                        android:layout_marginEnd="@dimen/card_margin_end"
+                        android:textColorLink="#2B98CA"
+                        android:linksClickable="true"
+                        android:autoLink="all"
+                        />
+                </LinearLayout>
+
+            </android.support.v7.widget.CardView>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/timestamp_tv"
+                android:visibility="visible"
+                android:textSize="@dimen/time_date_text_size"
+                android:layout_marginStart="@dimen/sms_rv_margin_start"
+                android:layout_marginEnd="@dimen/sms_rv_margin_end"
+                android:layout_marginBottom="@dimen/time_date_margin_btm"/>
+
+        </LinearLayout>
+    </LinearLayout>
