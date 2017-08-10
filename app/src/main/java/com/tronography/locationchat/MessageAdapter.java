@@ -13,32 +13,28 @@ import com.tronography.locationchat.model.MessageModel;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.tronography.locationchat.ui.ChatRoomActivity.MY_USER_KEY;
+import static com.tronography.locationchat.utils.SharedPrefsUtils.MY_USER_KEY;
 
-/**
- * Created by jonathancolon on 7/31/17.
- */
 
-public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
+public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
     ArrayList<MessageModel> chatLog = new ArrayList<>();
     Listener listener;
 
-    public MyAdapter(Listener listener) {
+    public MessageAdapter(Listener listener) {
         this.listener = listener;
     }
 
     @Override
-    public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public MessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.itemview_chat_rv,
                 parent, false);
 
-        MyViewHolder viewHolder = new MyViewHolder(itemView);
-        return viewHolder;
+        return new MessageViewHolder(itemView);
     }
 
     @Override
-    public void onBindViewHolder(MyViewHolder holder, int position) {
+    public void onBindViewHolder(MessageViewHolder holder, int position) {
         MessageModel message = chatLog.get(position);
         holder.bind(message);
     }
@@ -60,10 +56,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
 //  _______________________________________VIEWHOLDER_______________________________________________
 
-    class MyViewHolder extends RecyclerView.ViewHolder {
+    class MessageViewHolder extends RecyclerView.ViewHolder {
         private final TextView messageTV, timestampTV, usernameTV;
 
-        MyViewHolder(View itemView) {
+        MessageViewHolder(View itemView) {
             super(itemView);
             messageTV = itemView.findViewById(R.id.message_tv);
             timestampTV = itemView.findViewById(R.id.timestamp_tv);
@@ -76,7 +72,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             usernameTV.setText(messageModel.getUsername());
 
             if (Objects.equals(messageModel.getSenderId(), MY_USER_KEY)){
-                usernameTV.setTextColor(Color.parseColor("#37879A"));
+                usernameTV.setTextColor(Color.parseColor("#DB6B71"));
             } else {
                 usernameTV.setTextColor(Color.parseColor("#FF424242"));
             }

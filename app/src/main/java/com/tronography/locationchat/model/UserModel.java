@@ -4,9 +4,6 @@ import android.support.annotation.Nullable;
 
 import java.util.UUID;
 
-/**
- * Created by jonathancolon on 7/31/17.
- */
 
 public class UserModel {
     private String id;
@@ -73,4 +70,6 @@ public class UserModel {
                 ", profilePhoto=" + profilePhoto +
                 '}';
     }
+
+
 }

@@ -49,6 +49,21 @@
                     app:layout_constraintVertical_bias="0.879"
                     app:layout_constraintLeft_toLeftOf="parent"
                     android:layout_marginLeft="8dp"/>
+    
+                <TextView
+                    android:id="@+id/edit_option"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginTop="6dp"
+                    android:clickable="true"
+                    android:text="EDIT"
+                    android:textColor="@color/light_font"
+                    android:textStyle="bold"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_goneMarginEnd="8dp"/>
             
             </android.support.constraint.ConstraintLayout>
         
@@ -74,48 +89,30 @@
             android:animateLayoutChanges="true"
             android:orientation="vertical">
             
-            <TextView
+            <EditText
                 android:id="@+id/header_username_tv"
                 android:text="Username"
-                style="@style/user_profile_tv_dimensions"
+                style="@style/user_profile_details_et_dimensions"
                 android:gravity="center"
                 android:textSize="40sp"
-                android:textStyle="bold"/>
-            
-            <TextView
-                android:id="@+id/title_name_tv"
-                style="@style/user_profile_tv_dimensions"
-                android:layout_marginEnd="8dp"
-                android:layout_marginStart="8dp"
-                android:text="Name: "
                 android:textStyle="bold"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
-            
-            <TextView
-                android:id="@+id/details_name_tv"
-                style="@style/user_profile_tv_dimensions"
-                android:text="Some Name"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/title_name_tv"
-                tools:layout_editor_absoluteX="8dp"/>
-            
+                android:textColor="@color/edit_text_drawable"/>
+    
             <TextView
                 android:id="@+id/title_bio_tv"
-                style="@style/user_profile_tv_dimensions"
+                style="@style/user_profile_title_tv_dimensions"
                 android:layout_marginEnd="8dp"
                 android:layout_marginStart="8dp"
                 android:text="Bio: "
+                android:textSize="18sp"
                 android:textStyle="bold"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/details_name_tv"/>
             
-            <TextView
-                android:id="@+id/details_bio_tv"
-                style="@style/user_profile_tv_dimensions"
+            <EditText
+                android:id="@+id/details_bio_et"
+                style="@style/user_profile_details_et_dimensions"
                 android:text="@string/filler_text"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
@@ -124,19 +121,19 @@
             
             <TextView
                 android:id="@+id/title_location_tv"
-                style="@style/user_profile_tv_dimensions"
+                style="@style/user_profile_title_tv_dimensions"
                 android:layout_marginEnd="8dp"
                 android:layout_marginStart="8dp"
                 android:text="Location: "
                 android:textStyle="bold"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/details_bio_tv"/>
+                app:layout_constraintTop_toBottomOf="@+id/details_bio_et"/>
             
-            <TextView
-                android:id="@+id/details_city_tv"
-                style="@style/user_profile_tv_dimensions"
-                android:text="@string/filler_text"
+            <EditText
+                android:id="@+id/details_location_et"
+                style="@style/user_profile_details_et_dimensions"
+                android:text="New York, NY"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/title_location_tv"
