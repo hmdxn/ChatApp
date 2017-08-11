@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <style name="user_profile_details_et_dimensions">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:backgroundTint">@android:color/transparent</item>
+        <item name="android:enabled">false</item>
+        <item name="android:textColorHint">@color/charcoal</item>
+    </style>
+</resources>

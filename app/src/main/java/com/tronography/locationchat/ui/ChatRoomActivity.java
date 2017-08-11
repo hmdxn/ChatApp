@@ -7,85 +7,112 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.tronography.locationchat.MyAdapter;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.tronography.locationchat.ChatContract;
+import com.tronography.locationchat.ChatPresenter;
+import com.tronography.locationchat.MessageAdapter;
 import com.tronography.locationchat.R;
+import com.tronography.locationchat.firebase.FirebaseUtils;
 import com.tronography.locationchat.model.MessageModel;
 import com.tronography.locationchat.model.UserModel;
-import com.tronography.locationchat.utils.FirebaseUtils;
 import com.tronography.locationchat.utils.UsernameGenerator;
+
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.tronography.locationchat.utils.EditTextUtils.clearEditText;
+import static com.tronography.locationchat.firebase.FirebaseUtils.RetrieveMessageLogListener;
+import static com.tronography.locationchat.firebase.FirebaseUtils.RetrieveUserListener;
+import static com.tronography.locationchat.utils.EditTextUtils.clearText;
+import static com.tronography.locationchat.utils.ObjectUtils.isNull;
+import static com.tronography.locationchat.utils.SharedPrefsUtils.HAS_USERNAME_KEY;
+import static com.tronography.locationchat.utils.SharedPrefsUtils.MY_USER_KEY;
+import static com.tronography.locationchat.utils.SharedPrefsUtils.USERNAME_KEY;
+import static com.tronography.locationchat.utils.SharedPrefsUtils.USER_ID_KEY;
 import static com.tronography.locationchat.utils.SharedPrefsUtils.configurePrefs;
 import static com.tronography.locationchat.utils.SharedPrefsUtils.getPrefsData;
 
-public class ChatRoomActivity extends AppCompatActivity implements MyAdapter.Listener {
-    private final static String TAG = ChatRoomActivity.class.getSimpleName();
-    private static final String HAS_USERNAME_KEY = "has_username";
-    private static final String USERNAME_KEY = "saved_username";
-    private static final String USER_ID_KEY = "saved_user_id";
-    public static String MY_USER_KEY;
+public class ChatRoomActivity extends AppCompatActivity implements ChatContract.View, ChildEventListener,
+        MessageAdapter.Listener, RetrieveUserListener, RetrieveMessageLogListener {
+
+    public final String SENDER_ID_KEY = "sender_id";
+    public final String SENDER_USERNAME_KEY = "sender_username";
+    private final String TAG = ChatRoomActivity.class.getSimpleName();
     @BindView(R.id.chat_input_et)
     EditText editText;
+    @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
-    String username;
-    UserModel user;
-
-    private FirebaseUtils firebaseUtils = new FirebaseUtils();;
+    private String username;
+    private SharedPreferences prefs;
+    private UserModel user;
+    private FirebaseUtils firebaseUtils = new FirebaseUtils();
     private UsernameGenerator usernameGenerator = new UsernameGenerator();
     private String userID;
-    public static final String SENDER_ID_KEY = "sender_id";
-    public static final String SENDER_USERNAME_KEY = "sender_username";
+    private MessageAdapter adapter;
+    private ArrayList<MessageModel> messageLog;
+    private ChatContract.UserActionListener presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        initRecyclerview();
 
-        SharedPreferences prefs = this.getSharedPreferences(
+        initializePresenter();
+        setupAdapter();
+        setupList();
+
+        retrieveUserDetailsFromSharedPreferences();
+        firebaseUtils.addMessageChildEventListener(this);
+        firebaseUtils.addUserEventListener(this);
+
+        if (!isNull(userID)) {
+            firebaseUtils.queryUserByID(userID, this);
+        }
+    }
+
+    private void initializePresenter() {
+        if (presenter == null) presenter = new ChatPresenter(this);
+    }
+
+    private void setupAdapter() {
+        messageLog = new ArrayList<>();
+        adapter = new MessageAdapter(this);
+        adapter.setData(messageLog);
+    }
+
+    private void setupList() {
+        recyclerView.setLayoutManager(new LinearLayoutManager(recyclerView.getContext()));
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void retrieveUserDetailsFromSharedPreferences() {
+        prefs = this.getSharedPreferences(
                 "prefs", Context.MODE_PRIVATE);
 
         if (hasUsername(prefs)) {
-            username = getPrefsData(prefs, USERNAME_KEY, "name_not_found", this);
-            userID = getPrefsData(prefs, USER_ID_KEY, null, this);
-            configureReturningUser(userID, username);
+            username = getPrefsData(prefs, USERNAME_KEY, null);
+            userID = getPrefsData(prefs, USER_ID_KEY, null);
+            firebaseUtils.queryUserByID(userID, this);
         } else {
             configureNewUser(usernameGenerator.generateTempUsername());
-            configurePrefs(prefs, HAS_USERNAME_KEY, true, this);
-            configurePrefs(prefs, USERNAME_KEY, user.getUsername(), this);
-            configurePrefs(prefs, USER_ID_KEY, user.getId(), this);
+            configurePrefs(prefs, HAS_USERNAME_KEY, true);
+            configurePrefs(prefs, USERNAME_KEY, user.getUsername());
+            configurePrefs(prefs, USER_ID_KEY, user.getId());
+            firebaseUtils.addUserToFirebase(user);
         }
-
-        firebaseUtils.addMessageRefChildEventListener(this);
-        firebaseUtils.addUserRefChildEventListener();
-        firebaseUtils.addUserToFirebase(user);
-    }
-
-    private void initRecyclerview() {
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-        MyAdapter adapter = new MyAdapter(this);
-        adapter.setData(firebaseUtils.getChatLog());
-        recyclerView.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
     }
 
     private boolean hasUsername(SharedPreferences prefs) {
-        boolean hasUsername = getPrefsData(prefs, HAS_USERNAME_KEY, false, this);
-        return hasUsername;
-    }
-
-    private void configureReturningUser(String userID, String username) {
-        user = new UserModel(userID, username, null);
-        MY_USER_KEY = userID;
+        return getPrefsData(prefs, HAS_USERNAME_KEY, false);
     }
 
     private void configureNewUser(String username) {
@@ -94,19 +121,15 @@ public class ChatRoomActivity extends AppCompatActivity implements MyAdapter.Lis
         this.username = user.getUsername();
     }
 
-    public void refreshMessageLog() {
-        MyAdapter adapter = (MyAdapter) recyclerView.getAdapter();
-        adapter.setData(firebaseUtils.getChatLog());
-        adapter.notifyDataSetChanged();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        retrieveUserDetailsFromSharedPreferences();
+        retrieveMessages();
     }
 
-    @OnClick(R.id.send_button_iv)
-    public void onSendButtonClicked() {
-        String message = editText.getText().toString();
-        MessageModel messageModel = new MessageModel(message, MY_USER_KEY, username);
-        clearEditText(editText, this);
-        refreshMessageLog();
-        firebaseUtils.addMessageToFirebaseDb(messageModel, user);
+    public void retrieveMessages() {
+        firebaseUtils.retrieveMessagesFromFirebase(this);
     }
 
     @Override
@@ -120,10 +143,91 @@ public class ChatRoomActivity extends AppCompatActivity implements MyAdapter.Lis
 
     @Override
     public void onMessageClicked(MessageModel message) {
-            Intent intent = new Intent(this, UserProfileActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra(SENDER_ID_KEY, message.getSenderId());
-            intent.putExtra(SENDER_USERNAME_KEY, message.getUsername());
-            this.startActivity(intent);
+        Intent intent = new Intent(this, UserProfileActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(SENDER_ID_KEY, message.getSenderId());
+        intent.putExtra(SENDER_USERNAME_KEY, message.getUsername());
+        this.startActivity(intent);
+    }
+
+    @OnClick(R.id.send_button_iv)
+    public void submit() {
+        presenter.send();
+    }
+
+    @Override
+    public void onUserRetrieved(UserModel userModel) {
+        user = userModel;
+        userID = user.getId();
+        applyUserDetails(prefs, userModel);
+    }
+
+    void applyUserDetails(SharedPreferences prefs, UserModel userModel) {
+        configureReturningUser(userID, userModel.getUsername());
+        configurePrefs(prefs, USERNAME_KEY, user.getUsername());
+        firebaseUtils.addUserToFirebase(user);
+    }
+
+    private void configureReturningUser(String userID, String username) {
+        user = new UserModel(userID, username, null);
+        MY_USER_KEY = userID;
+    }
+
+    @Override
+    public void onMessageLogReceived(ArrayList<MessageModel> messageLog) {
+        this.messageLog.clear();
+        this.messageLog = messageLog;
+        refreshMessageRecyclerView(this.messageLog);
+        Log.e(TAG, "onMessageLogReceived: " + this.messageLog.size());
+    }
+
+    public void refreshMessageRecyclerView(ArrayList<MessageModel> messageLog) {
+        Log.e(TAG, "refreshMessageRecyclerView: " + messageLog.size());
+        adapter.setData(messageLog);
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void sendMessage() {
+        String message = editText.getText().toString();
+        firebaseUtils.addMessageToFirebaseDb(new MessageModel(message, user.getId(), user.getUsername()));
+        clearText(editText, this);
+    }
+
+    @Override
+    public void fireBaseOnChildAdded(DataSnapshot dataSnapshot, String s) {
+        Iterable<DataSnapshot> children = dataSnapshot.getChildren();
+
+        for (DataSnapshot child : children) {
+            MessageModel messageModel = child.getValue(MessageModel.class);
+            messageLog.add(messageModel);
+            recyclerView.scrollToPosition(messageLog.size() - 1);
+            adapter.notifyItemInserted(messageLog.size() - 1);
+        }
+    }
+
+    @Override
+    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+        presenter.childAdded(dataSnapshot, s);
+    }
+
+    @Override
+    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+    }
+
+    @Override
+    public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+    }
+
+    @Override
+    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+    }
+
+    @Override
+    public void onCancelled(DatabaseError databaseError) {
+
     }
 }

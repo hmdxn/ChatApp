@@ -8,13 +8,24 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
     
-    <style name="user_profile_tv_dimensions">
+    <style name="user_profile_title_tv_dimensions">
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_marginEnd">8dp</item>
         <item name="android:layout_marginStart">8dp</item>
         <item name="android:layout_marginTop">8dp</item>
-        
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/carmine_pink_lite</item>
+    </style>
+    
+    <style name="user_profile_details_et_dimensions">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:enabled">false</item>
+        <item name="android:textColorHint">@color/charcoal</item>
     </style>
 
 </resources>
