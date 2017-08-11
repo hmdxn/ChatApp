@@ -10,5 +10,7 @@
         <item name="android:backgroundTint">@android:color/transparent</item>
         <item name="android:enabled">false</item>
         <item name="android:textColorHint">@color/charcoal</item>
+        <item name="android:textColor">@color/edit_text_details_drawable</item>
     </style>
+    
 </resources>

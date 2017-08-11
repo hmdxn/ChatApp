@@ -25,7 +25,7 @@
         <item name="android:layout_marginStart">8dp</item>
         <item name="android:layout_marginTop">8dp</item>
         <item name="android:enabled">false</item>
-        <item name="android:textColorHint">@color/charcoal</item>
+        <item name="android:textColorHint">@color/edit_text_details_drawable</item>
     </style>
 
 </resources>

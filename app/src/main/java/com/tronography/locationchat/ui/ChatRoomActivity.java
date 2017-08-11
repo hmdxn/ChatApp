@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -125,20 +124,12 @@ public class ChatRoomActivity extends AppCompatActivity implements ChatContract.
     protected void onResume() {
         super.onResume();
         retrieveUserDetailsFromSharedPreferences();
-        retrieveMessages();
-    }
-
-    public void retrieveMessages() {
         firebaseUtils.retrieveMessagesFromFirebase(this);
     }
 
     @Override
     public void onMessageLongClicked(MessageModel message) {
-        String key = message.getSenderId();
-        if (firebaseUtils.getUserMap().containsKey(key)) {
-            String id = firebaseUtils.getUserMap().get(key).getId();
-            Toast.makeText(this, id, Toast.LENGTH_SHORT).show();
-        }
+        Toast.makeText(this, message.getSenderId(), Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -174,17 +165,14 @@ public class ChatRoomActivity extends AppCompatActivity implements ChatContract.
     }
 
     @Override
-    public void onMessageLogReceived(ArrayList<MessageModel> messageLog) {
-        this.messageLog.clear();
-        this.messageLog = messageLog;
-        refreshMessageRecyclerView(this.messageLog);
-        Log.e(TAG, "onMessageLogReceived: " + this.messageLog.size());
+    public void onMessageLogReceived(ArrayList<MessageModel> refreshedMessageLog) {
+        messageLog = refreshedMessageLog;
+        refreshMessageRecyclerView(messageLog);
     }
 
     public void refreshMessageRecyclerView(ArrayList<MessageModel> messageLog) {
-        Log.e(TAG, "refreshMessageRecyclerView: " + messageLog.size());
+        MessageAdapter adapter = (MessageAdapter) recyclerView.getAdapter();
         adapter.setData(messageLog);
-        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -201,9 +189,13 @@ public class ChatRoomActivity extends AppCompatActivity implements ChatContract.
         for (DataSnapshot child : children) {
             MessageModel messageModel = child.getValue(MessageModel.class);
             messageLog.add(messageModel);
-            recyclerView.scrollToPosition(messageLog.size() - 1);
             adapter.notifyItemInserted(messageLog.size() - 1);
         }
+    }
+
+    @Override
+    public void fireBaseOnChildChanged() {
+        firebaseUtils.retrieveMessagesFromFirebase(this);
     }
 
     @Override
@@ -213,21 +205,18 @@ public class ChatRoomActivity extends AppCompatActivity implements ChatContract.
 
     @Override
     public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
+        presenter.childChanged(dataSnapshot, s);
     }
 
     @Override
     public void onChildRemoved(DataSnapshot dataSnapshot) {
-
     }
 
     @Override
     public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
     }
 
     @Override
     public void onCancelled(DatabaseError databaseError) {
-
     }
 }

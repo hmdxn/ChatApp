@@ -10,6 +10,8 @@ public class ChatContract {
     void sendMessage();
 
     void fireBaseOnChildAdded(DataSnapshot dataSnapshot, String s);
+
+    void fireBaseOnChildChanged();
   }
 
   public interface UserActionListener {
@@ -17,5 +19,7 @@ public class ChatContract {
     void send();
 
     void childAdded(DataSnapshot dataSnapshot, String s);
+
+    void childChanged(DataSnapshot dataSnapshot, String s);
   }
 }
