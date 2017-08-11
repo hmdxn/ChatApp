@@ -3,6 +3,7 @@ package com.tronography.locationchat.ui;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -14,8 +15,6 @@ import com.tronography.locationchat.utils.SharedPrefsUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-
-import static com.tronography.locationchat.R.string.save;
 
 public class UserProfileActivity extends AppCompatActivity implements FirebaseUtils.RetrieveUserListener {
 
@@ -46,30 +45,19 @@ public class UserProfileActivity extends AppCompatActivity implements FirebaseUt
     public void onClick() {
 
         if (editOptionTV.getText().equals("EDIT")){
-            editOptionTV.setText(save);
+            editOptionTV.setText(R.string.save);
             enableDetailsEditText();
         } else if (editOptionTV.getText().equals("SAVE")){
             editOptionTV.setText(R.string.edit);
             disableDetailsEditText();
-            saveUsername();
-            saveBioDetails();
-
+            firebaseUtils.applyNewUsernameInFireBase(userModel, headerUsernameTV.getText().toString());
+            firebaseUtils.applyBioDetailsInFireBase(userModel, bioDetailsET.getText().toString());
             SharedPreferences prefs = SharedPrefsUtils.getSharedPreferences(this);
             if (SharedPrefsUtils.MY_USER_KEY.equals(userModel.getId())){
                 SharedPrefsUtils.updateUsername(prefs, userModel);
             }
             firebaseUtils.updateMessageSenderUsernames(userModel);
         }
-    }
-
-    private void saveBioDetails() {
-        String bio = bioDetailsET.getText().toString();
-        firebaseUtils.applyBioDetailsInFireBase(userModel, bio);
-    }
-
-    private void saveUsername(){
-        String username = headerUsernameTV.getText().toString();
-        firebaseUtils.applyBioDetailsInFireBase(userModel, username);
     }
 
     private void enableDetailsEditText() {
@@ -91,6 +79,7 @@ public class UserProfileActivity extends AppCompatActivity implements FirebaseUt
         SharedPreferences prefs = SharedPrefsUtils.getSharedPreferences(this);
         if (SharedPrefsUtils.MY_USER_KEY.equals(userModel.getId())){
             SharedPrefsUtils.updateUsername(prefs, userModel);
+            editOptionTV.setVisibility(View.VISIBLE);
         }
         firebaseUtils.updateMessageSenderUsernames(userModel);
     }

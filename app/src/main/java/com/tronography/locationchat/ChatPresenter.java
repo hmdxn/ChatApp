@@ -24,4 +24,9 @@ public class ChatPresenter implements ChatContract.UserActionListener {
   public void childAdded(DataSnapshot dataSnapshot, String s) {
     view.fireBaseOnChildAdded(dataSnapshot, s);
   }
+
+  @Override
+  public void childChanged(DataSnapshot dataSnapshot, String s){
+    view.fireBaseOnChildChanged();
+  }
 }

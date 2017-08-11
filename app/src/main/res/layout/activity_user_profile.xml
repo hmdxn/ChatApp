@@ -63,7 +63,8 @@
                     android:textStyle="bold"
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_goneMarginEnd="8dp"/>
+                    app:layout_goneMarginEnd="8dp"
+                    android:visibility="gone"/>
             
             </android.support.constraint.ConstraintLayout>
         

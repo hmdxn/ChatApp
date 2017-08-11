@@ -136,7 +136,7 @@ public class FirebaseUtils {
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                activity.onChildAdded(dataSnapshot, s);
+                activity.fireBaseOnChildChanged();
             }
 
             @Override
@@ -157,12 +157,10 @@ public class FirebaseUtils {
         userReference.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(com.google.firebase.database.DataSnapshot dataSnapshot, String s) {
-
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                activity.onChildAdded(dataSnapshot, s);
             }
 
             @Override
@@ -202,10 +200,11 @@ public class FirebaseUtils {
     }
 
     public void retrieveMessagesFromFirebase(final RetrieveMessageLogListener listener) {
+        this.retrieveMessageLogListener = listener;
+        final ArrayList<MessageModel> refreshedMessageLog = new ArrayList<>();
         messageReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                ArrayList<MessageModel> messageLog = new ArrayList<>();
                 Iterable<DataSnapshot> children = dataSnapshot.getChildren();
                 for (DataSnapshot child : children) {
                     String key = child.getKey();
@@ -214,8 +213,9 @@ public class FirebaseUtils {
                             .child("message_model")
                             .getValue(MessageModel.class);
                     Log.e(TAG, "retrieveMessagesFromFirebase: " + messageModel.getMessage());
+                    refreshedMessageLog.add(messageModel);
                 }
-                listener.onMessageLogReceived(messageLog);
+                listener.onMessageLogReceived(refreshedMessageLog);
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {

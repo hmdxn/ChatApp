@@ -15,6 +15,14 @@ public class UserModel {
     public UserModel() {
     }
 
+    public UserModel(String id, String username, String profilePhoto, String bio, String location) {
+        this.id = id;
+        this.username = username;
+        this.profilePhoto = profilePhoto;
+        this.bio = bio;
+        this.location = location;
+    }
+
     public UserModel(String id, String username, @Nullable String profilePhoto) {
         this.id = id;
         this.username = username;
