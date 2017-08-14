@@ -10,15 +10,17 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".ui.ChatRoomActivity"
+            android:name=".chatroom.ChatRoomActivity"
             android:windowSoftInputMode="stateHidden">
+        </activity>
+        <activity android:name=".userprofile.UserProfileActivity">
+        </activity>
+        <activity android:name=".login.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-    
+        
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-        </activity>
-        <activity android:name=".ui.UserProfileActivity">
         </activity>
     </application>
 

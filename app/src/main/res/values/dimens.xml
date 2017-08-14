@@ -10,7 +10,6 @@
     <dimen name="edit_btn_margin_bottom">5dp</dimen>
     <dimen name="card_text_margin_start">10dp</dimen>
     <dimen name="card_info_text_size">16sp</dimen>
-    <dimen name="card_elevation">24dp</dimen>
     
     <dimen name="fab_margin_right">25dp</dimen>
     <dimen name="fab_width">56dp</dimen>
@@ -33,5 +32,22 @@
     <dimen name="info_title_text_size">18sp</dimen>
     <dimen name="min_text_size">12sp</dimen>
     <dimen name="graph_label_text_size">10sp</dimen>
+    
+    <dimen name="image_height">100dp</dimen>
+    <dimen name="padding_login">16dp</dimen>
+    <dimen name="padding_login_middle">4dp</dimen>
+    <dimen name="top_image">64dp</dimen>
+    <dimen name="edit_text_padding">10dp</dimen>
+    <dimen name="card_corners">2dp</dimen>
+    <dimen name="card_elevation">4dp</dimen>
+    
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    
+    <dimen name="icon_top_margin">24dp</dimen>
+    <dimen name="icon_bottom_margin">24dp</dimen>
+    <dimen name="title_bottom_margin">16dp</dimen>
+    <dimen name="field_width_standard">160dp</dimen>
     
 </resources>

@@ -11,27 +11,22 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.tronography.locationchat.model.MessageModel;
 import com.tronography.locationchat.model.UserModel;
-import com.tronography.locationchat.ui.ChatRoomActivity;
+import com.tronography.locationchat.chatroom.ChatRoomActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
 import static android.content.ContentValues.TAG;
-import static com.tronography.locationchat.utils.ObjectUtils.isNull;
 
 
-public class FirebaseUtils {
+public class FirebaseMessageUtils {
 
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
-    private DatabaseReference root = database.getReference();
     private DatabaseReference messageReference = database.getReference("messages");
-    private DatabaseReference userReference = database.getReference("members");
     private HashMap<String, UserModel> userMap = new HashMap<>();
-    private RetrieveUserListener retrieveUserListener;
-    private RetrieveMessageLogListener retrieveMessageLogListener;
 
-    public FirebaseUtils() {
+    public FirebaseMessageUtils() {
     }
 
     public HashMap<String, UserModel> getUserMap() {
@@ -68,56 +63,13 @@ public class FirebaseUtils {
         return messageModelMap;
     }
 
-    public void addUserToFirebase(UserModel userObject) {
-        //creates a unique key identifier
-        HashMap<String, Object> uniqueMemberIdentifier = new HashMap<>();
-
-        //appends root with unique key
-        userReference.updateChildren(uniqueMemberIdentifier);
-
-        //reference the unique key object in the database
-        DatabaseReference memberRoot = userReference.child(userObject.getId());
-
-        //now we must generate the children of this new object
-        HashMap<String, Object> userModelMap = setDatabaseUserValues(userObject);
-
-        //confirm changes
-        memberRoot.updateChildren(userModelMap);
-    }
-
-    @NonNull
-    private HashMap<String, Object> setDatabaseUserValues(UserModel userObject) {
-        HashMap<String, Object> userModelMap = new HashMap<>();
-        userModelMap.put("user_model", userObject);
-        return userModelMap;
-    }
-
     private void applySenderNameChangesToMessage(MessageModel messageModel, UserModel userModel){
         if(Objects.equals(messageModel.getSenderId(), userModel.getId())){
             applySenderNameChangeInFirebase(messageModel, userModel.getUsername());
         }
     }
-    public void applyNewUsernameInFireBase(UserModel userObject, String newUserName) {
-        //reference the unique key object in the database
-        DatabaseReference memberRoot = userReference.child(userObject.getId());
-        userObject.setUsername(newUserName);
-        //now we must generate the children of this new object
-        HashMap<String, Object> userModelMap = setDatabaseUserValues(userObject);
-        //confirm changes
-        memberRoot.updateChildren(userModelMap);
-    }
 
-    public void applyBioDetailsInFireBase(UserModel userObject, String bio) {
-        //reference the unique key object in the database
-        DatabaseReference memberRoot = userReference.child(userObject.getId());
-        userObject.setBio(bio);
-        //now we must generate the children of this new object
-        HashMap<String, Object> userModelMap = setDatabaseUserValues(userObject);
-        //confirm changes
-        memberRoot.updateChildren(userModelMap);
-    }
-
-    public void applySenderNameChangeInFirebase(MessageModel messagModel, String newUserName) {
+    private void applySenderNameChangeInFirebase(MessageModel messagModel, String newUserName) {
         //reference the unique key object in the database
         DatabaseReference memberRoot = messageReference.child(messagModel.getMessageId());
         messagModel.setUsername(newUserName);
@@ -137,30 +89,6 @@ public class FirebaseUtils {
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 activity.fireBaseOnChildChanged();
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        });
-    }
-
-    public void addUserEventListener(final ChatRoomActivity activity) {
-        userReference.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(com.google.firebase.database.DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
             }
 
             @Override
@@ -200,7 +128,6 @@ public class FirebaseUtils {
     }
 
     public void retrieveMessagesFromFirebase(final RetrieveMessageLogListener listener) {
-        this.retrieveMessageLogListener = listener;
         final ArrayList<MessageModel> refreshedMessageLog = new ArrayList<>();
         messageReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -221,34 +148,6 @@ public class FirebaseUtils {
             public void onCancelled(DatabaseError databaseError) {
             }
         });
-    }
-
-    public void queryUserByID(final String userId, final RetrieveUserListener retrieveUserListener) {
-        this.retrieveUserListener = retrieveUserListener;
-        root.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                UserModel userModel = dataSnapshot
-                        .child("members")
-                        .child(userId)
-                        .child("user_model")
-                        .getValue(UserModel.class);
-                if (!isNull(userModel)) {
-                    retrieveUserListener.onUserRetrieved(userModel);
-                } else {
-                    Log.e(TAG, "onDataChange: " + "that key does not exist");
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e(TAG, "onCancelled: " + databaseError.toString());
-            }
-        });
-    }
-
-    public interface RetrieveUserListener {
-        void onUserRetrieved(UserModel userModel);
     }
 
     public interface RetrieveMessageLogListener {

@@ -92,7 +92,6 @@
             
             <EditText
                 android:id="@+id/header_username_tv"
-                android:text="Username"
                 style="@style/user_profile_details_et_dimensions"
                 android:gravity="center"
                 android:textSize="40sp"
