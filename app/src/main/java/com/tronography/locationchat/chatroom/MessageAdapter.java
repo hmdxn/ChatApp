@@ -1,4 +1,4 @@
-package com.tronography.locationchat;
+package com.tronography.locationchat.chatroom;
 
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
@@ -8,17 +8,18 @@ import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.tronography.locationchat.R;
 import com.tronography.locationchat.model.MessageModel;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.tronography.locationchat.utils.SharedPrefsUtils.MY_USER_KEY;
+import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_KEY;
 
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
-    ArrayList<MessageModel> chatLog = new ArrayList<>();
+    ArrayList<MessageModel> messageLog = new ArrayList<>();
     Listener listener;
 
     public MessageAdapter(Listener listener) {
@@ -35,17 +36,17 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     @Override
     public void onBindViewHolder(MessageViewHolder holder, int position) {
-        MessageModel message = chatLog.get(position);
+        MessageModel message = messageLog.get(position);
         holder.bind(message);
     }
 
     @Override
     public int getItemCount() {
-        return chatLog.size();
+        return messageLog.size();
     }
 
     public void setData(ArrayList<MessageModel> chatLog){
-        this.chatLog = chatLog;
+        this.messageLog = chatLog;
         notifyDataSetChanged();
     }
 
@@ -71,7 +72,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             timestampTV.setText(messageModel.getTimeStamp());
             usernameTV.setText(messageModel.getUsername());
 
-            if (Objects.equals(messageModel.getSenderId(), MY_USER_KEY)){
+            if (Objects.equals(messageModel.getSenderId(), CURRENT_USER_KEY)){
                 usernameTV.setTextColor(Color.parseColor("#DB6B71"));
             } else {
                 usernameTV.setTextColor(Color.parseColor("#FF424242"));

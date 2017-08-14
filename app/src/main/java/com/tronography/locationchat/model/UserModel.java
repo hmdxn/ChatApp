@@ -2,8 +2,6 @@ package com.tronography.locationchat.model;
 
 import android.support.annotation.Nullable;
 
-import java.util.UUID;
-
 
 public class UserModel {
     private String id;
@@ -29,8 +27,8 @@ public class UserModel {
         this.profilePhoto = profilePhoto;
     }
 
-    public UserModel(String username) {
-        this.id = UUID.randomUUID().toString();
+    public UserModel(String username, String id) {
+        this.id = id;
         this.username = username;
     }
 

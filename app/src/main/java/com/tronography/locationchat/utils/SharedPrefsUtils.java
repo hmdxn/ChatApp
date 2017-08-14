@@ -12,49 +12,70 @@ import com.tronography.locationchat.model.UserModel;
 
 public class SharedPrefsUtils {
 
-    public static final String HAS_USERNAME_KEY = "has_username";
+    public static final String HAS_USER_ID = "has_sender_id";
     public static final String USERNAME_KEY = "saved_username";
     public static final String USER_ID_KEY = "saved_user_id";
-    public static String MY_USER_KEY;
-    public static String MY_USER_NAME;
+    public static String CURRENT_USER_KEY;
+    private SharedPreferences prefs;
 
-    public static boolean getPrefsData(SharedPreferences prefs, String key, @Nullable boolean defValue) {
+    public SharedPrefsUtils(Context context) {
+        prefs = getSharedPreferences(context);
+    }
+
+    private boolean getPrefsData(String key, @Nullable boolean defValue) {
         return prefs.getBoolean(key, defValue);
     }
 
-    public static String getPrefsData(SharedPreferences prefs, String key, @Nullable String defValue) {
+    private String getPrefsData(String key, @Nullable String defValue) {
         return prefs.getString(key, defValue);
     }
 
-    public static void configurePrefs(SharedPreferences prefs, String key, Boolean defValue) {
+    private void setSharedPreferencesData(SharedPreferences prefs, String key, Boolean defValue) {
         prefs.edit()
                 .putBoolean(key, defValue)
                 .apply();
     }
 
-    public static void configurePrefs(SharedPreferences prefs, String key, String defValue) {
+    private void setSharedPreferencesData(SharedPreferences prefs, String key, String defValue) {
         prefs.edit()
                 .putString(key, defValue)
                 .apply();
     }
 
-    public static SharedPreferences getSharedPreferences(Context context) {
+    public boolean getHasSenderId(){
+       return getPrefsData(HAS_USER_ID, false);
+    }
+
+    public String getReturningUserId(){
+        return getPrefsData(USER_ID_KEY, null);
+    }
+
+
+    public void setSharedPreferencesUserId(String userId){
+        setSharedPreferencesData(prefs, USER_ID_KEY, userId);
+    }
+
+    public void setHasSenderId(Boolean hasSenderId){
+        setSharedPreferencesData(prefs, HAS_USER_ID, true);
+    }
+
+    private SharedPreferences getSharedPreferences(Context context) {
         return context.getSharedPreferences("prefs", Context.MODE_PRIVATE);
     }
 
-    public static void updateUserDetails(SharedPreferences prefs, UserModel userModel) {
-        updateUsername(prefs, userModel);
-        updateUserId(prefs, userModel);
+    public void updateUserDetails(UserModel userModel) {
+        updateUsername(userModel);
+        updateUserId(userModel);
     }
 
-    public static void updateUserId(SharedPreferences prefs, UserModel userModel) {
-        configurePrefs(prefs, SharedPrefsUtils.USERNAME_KEY, userModel.getUsername());
-        configurePrefs(prefs, USER_ID_KEY, userModel.getId());
+    public void updateUserId(UserModel userModel) {
+        setSharedPreferencesData(prefs, SharedPrefsUtils.USERNAME_KEY, userModel.getUsername());
+        setSharedPreferencesData(prefs, USER_ID_KEY, userModel.getId());
     }
 
-    public static void updateUsername(SharedPreferences prefs, UserModel userModel) {
-        configurePrefs(prefs, SharedPrefsUtils.USERNAME_KEY, userModel.getUsername());
-        configurePrefs(prefs, USER_ID_KEY, userModel.getId());
+    public void updateUsername(UserModel userModel) {
+        setSharedPreferencesData(prefs, SharedPrefsUtils.USERNAME_KEY, userModel.getUsername());
+        setSharedPreferencesData(prefs, USER_ID_KEY, userModel.getId());
     }
 
 
