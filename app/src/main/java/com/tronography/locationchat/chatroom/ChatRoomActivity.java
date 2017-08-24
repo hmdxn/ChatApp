@@ -37,6 +37,7 @@ import butterknife.OnClick;
 import static com.tronography.locationchat.firebase.FirebaseMessageUtils.RetrieveMessageLogListener;
 import static com.tronography.locationchat.userprofile.UserProfileActivity.SENDER_ID_KEY;
 import static com.tronography.locationchat.utils.EditTextUtils.clearText;
+import static com.tronography.locationchat.utils.ObjectUtils.isEmpty;
 import static com.tronography.locationchat.utils.ObjectUtils.isNull;
 import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_KEY;
 
@@ -48,6 +49,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
     EditText editText;
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
+
     private UserModel user;
     private FirebaseMessageUtils firebaseMessageUtils = new FirebaseMessageUtils();
     private String userID;
@@ -56,10 +58,15 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
     private ChatContract.UserActionListener presenter;
     private FirebaseUserUtils firebaseUserUtils = new FirebaseUserUtils();
     private SharedPrefsUtils sharedPrefsUtils;
+    private String roomID;
+    private static final String ROOM_ID_KEY = "room_id";
+    private static final String ROOM_NAME_KEY = "room_name";
+
 
     // [START declare_auth]
     private FirebaseAuth mAuth;
     private FirebaseUser firebaseUser;
+    private String roomName;
     // [END declare_auth]
 
     public static Intent provideIntent(Context context, String userID) {
@@ -68,30 +75,44 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
         return intent;
     }
 
+    public static Intent provideIntent(Context context, String roomID, String roomName) {
+        Intent intent = new Intent(context, ChatRoomActivity.class);
+        intent.putExtra(ROOM_ID_KEY, roomID);
+        intent.putExtra(ROOM_NAME_KEY, roomName);
+        return intent;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.chatroom_activity);
         ButterKnife.bind(this);
 
         // [START initialize_auth]
         mAuth = FirebaseAuth.getInstance();
         // [END initialize_auth]
 
+        roomID = getIntent().getStringExtra(ROOM_ID_KEY);
+        roomName = getIntent().getStringExtra(ROOM_NAME_KEY);
+
         initializePresenter();
         setupAdapter();
         setupList();
 
-        firebaseMessageUtils.addMessageChildEventListener(this);
-        firebaseUserUtils.addUserEventListener(this);
+        firebaseMessageUtils.addMessageChildEventListener(presenter, roomID);
+        Log.e(TAG, "onCreate: " + "MessageEventListenerAdded");
+        firebaseUserUtils.addUserEventListener(presenter);
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
+
+        setTitle(" Room : " + roomName);
 
         if (!isNull(userID)) {
             firebaseUserUtils.queryUserByID(userID, this);
         }
     }
+    // [END on_start_check_user]
 
     // [START on_start_check_user]
     @Override
@@ -99,7 +120,6 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
         super.onStart();
         checkIfUserIsLoggedIn();
     }
-    // [END on_start_check_user]
 
     private void checkIfUserIsLoggedIn() {
         firebaseUser = mAuth.getCurrentUser();
@@ -147,7 +167,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
         super.onResume();
         Log.e(TAG, "onResume: " + userID);
         loadReturningUser(userID);
-        firebaseMessageUtils.retrieveMessagesFromFirebase(this);
+        firebaseMessageUtils.retrieveMessagesFromFirebase(this, roomID);
     }
 
     @Override
@@ -172,7 +192,9 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
 
     @Override
     public void onMessageLogReceived(ArrayList<MessageModel> refreshedMessageLog) {
+        Log.e(TAG, "onMessageLogReceived: " + "RECEIVED" );
         messageLog = refreshedMessageLog;
+        System.out.println("refreshedMessageLog = " + refreshedMessageLog);
         refreshMessageRecyclerView(messageLog);
     }
 
@@ -184,14 +206,20 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
     @Override
     public void sendMessage() {
         String message = editText.getText().toString();
-        firebaseMessageUtils.addMessageToFirebaseDb(new MessageModel(message, user.getId(), user.getUsername()));
-        clearText(editText, this);
+        if (!isEmpty(message)){
+            firebaseMessageUtils.addMessageToFirebaseDb(new MessageModel(message, user.getId(),
+                    user.getUsername()), roomID);
+            clearText(editText, this);
+        }
     }
 
     @Override
-    public void fireBaseOnChildAdded(DataSnapshot dataSnapshot, String s) {
+    public void messagesOnChildAdded(DataSnapshot dataSnapshot, String s) {
         Iterable<DataSnapshot> children = dataSnapshot.getChildren();
+        Log.e(TAG, "messagesOnChildAdded: " + dataSnapshot.getKey());
         for (DataSnapshot child : children) {
+            Log.e(TAG, "messagesOnChildAdded: " + child.getKey());
+            Log.e(TAG, "messagesOnChildAdded: " + child.child("message_model").getValue(MessageModel.class));
             MessageModel messageModel = child.getValue(MessageModel.class);
             messageLog.add(messageModel);
             recyclerView.scrollToPosition(messageLog.size() - 1);
@@ -200,8 +228,8 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
     }
 
     @Override
-    public void fireBaseOnChildChanged() {
-        firebaseMessageUtils.retrieveMessagesFromFirebase(this);
+    public void messagesOnChildChanged() {
+        firebaseMessageUtils.retrieveMessagesFromFirebase(this, roomID);
     }
 
     @Override
@@ -216,8 +244,14 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
     }
 
     @Override
+    public void signOut() {
+        mAuth.signOut();
+        updateUI(null);
+    }
+
+    @Override
     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-        presenter.childAdded(dataSnapshot, s);
+        presenter.messagesOnChildAdded(dataSnapshot, s);
     }
 
     @Override
@@ -254,13 +288,6 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
-
         }
-    }
-
-    @Override
-    public void signOut() {
-        mAuth.signOut();
-        updateUI(null);
     }
 }

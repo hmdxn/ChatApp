@@ -9,15 +9,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.tronography.locationchat.chatroom.ChatContract;
 import com.tronography.locationchat.model.MessageModel;
 import com.tronography.locationchat.model.UserModel;
-import com.tronography.locationchat.chatroom.ChatRoomActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
 import static android.content.ContentValues.TAG;
+import static com.tronography.locationchat.utils.ObjectUtils.isNull;
 
 
 public class FirebaseMessageUtils {
@@ -37,17 +38,23 @@ public class FirebaseMessageUtils {
         return database.getReference(path);
     }
 
-    public void addMessageToFirebaseDb(MessageModel messageModel) {
+    public void addMessageToFirebaseDb(MessageModel messageModel, String roomID) {
         //creates a unique key identifier
         HashMap<String, Object> uniqueMessageIdentifier = new HashMap<>();
 
+        Log.e(TAG, "message ref key: " + messageReference.getKey());
         //appends root with unique key
-        messageReference.updateChildren(uniqueMessageIdentifier);
+        Log.e(TAG, "message ref child room id key: " + messageReference.child(roomID).getKey());
+        messageReference.child(roomID).updateChildren(uniqueMessageIdentifier);
+
         String messageId = messageReference.push().getKey();
         messageModel.setMessageId(messageId);
 
+        Log.e(TAG, "MESSAGE ID: " + messageId );
+
         //references the object using the message ID in the database
-        DatabaseReference messageRoot = messageReference.child(messageId);
+        DatabaseReference messageRoot = messageReference.child(roomID).child(messageId);
+
 
         //assigns values to the children of this new message object
         HashMap<String, Object> messageValueMap = setDatabaseMessageValues(messageModel);
@@ -79,16 +86,17 @@ public class FirebaseMessageUtils {
         memberRoot.updateChildren(userModelMap);
     }
 
-    public void addMessageChildEventListener(final ChatRoomActivity activity) {
-        messageReference.addChildEventListener(new ChildEventListener() {
+    public void addMessageChildEventListener(final ChatContract.UserActionListener presenter, String roomID) {
+        messageReference.child(roomID).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(com.google.firebase.database.DataSnapshot dataSnapshot, String s) {
-                activity.onChildAdded(dataSnapshot, s);
+                Log.e(TAG, "onChildAdded: " + dataSnapshot.getKey() );
+                presenter.messagesOnChildAdded(dataSnapshot, s);
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                activity.fireBaseOnChildChanged();
+                presenter.childChanged(dataSnapshot, s);
             }
 
             @Override
@@ -127,20 +135,23 @@ public class FirebaseMessageUtils {
         });
     }
 
-    public void retrieveMessagesFromFirebase(final RetrieveMessageLogListener listener) {
+    public void retrieveMessagesFromFirebase(final RetrieveMessageLogListener listener, String roomID) {
         final ArrayList<MessageModel> refreshedMessageLog = new ArrayList<>();
-        messageReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        messageReference.child(roomID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Iterable<DataSnapshot> children = dataSnapshot.getChildren();
                 for (DataSnapshot child : children) {
                     String key = child.getKey();
+                    Log.e(TAG, "onDataChange: " + key);
                     MessageModel messageModel = dataSnapshot
                             .child(key)
                             .child("message_model")
                             .getValue(MessageModel.class);
-                    Log.e(TAG, "retrieveMessagesFromFirebase: " + messageModel.getMessage());
-                    refreshedMessageLog.add(messageModel);
+                    if (!isNull(messageModel)) {
+                        Log.e(TAG, "retrieveMessagesFromFirebase: " + messageModel.getMessage());
+                        refreshedMessageLog.add(messageModel);
+                    }
                 }
                 listener.onMessageLogReceived(refreshedMessageLog);
             }

@@ -12,7 +12,7 @@ public class ChatPresenter implements ChatContract.UserActionListener {
 
     private ChatContract.View view;
 
-    public ChatPresenter(@NonNull ChatContract.View view) {
+    ChatPresenter(@NonNull ChatContract.View view) {
         this.view = view;
     }
 
@@ -22,13 +22,13 @@ public class ChatPresenter implements ChatContract.UserActionListener {
     }
 
     @Override
-    public void childAdded(DataSnapshot dataSnapshot, String s) {
-        view.fireBaseOnChildAdded(dataSnapshot, s);
+    public void messagesOnChildAdded(DataSnapshot dataSnapshot, String s) {
+        view.messagesOnChildAdded(dataSnapshot, s);
     }
 
     @Override
     public void childChanged(DataSnapshot dataSnapshot, String s) {
-        view.fireBaseOnChildChanged();
+        view.messagesOnChildChanged();
     }
 
     @Override

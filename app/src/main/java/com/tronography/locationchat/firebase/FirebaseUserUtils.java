@@ -9,7 +9,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.tronography.locationchat.chatroom.ChatRoomActivity;
+import com.tronography.locationchat.chatroom.ChatContract;
 import com.tronography.locationchat.model.UserModel;
 
 import java.util.HashMap;
@@ -47,7 +47,7 @@ public class FirebaseUserUtils {
         });
     }
 
-    public void addUserEventListener(final ChatRoomActivity activity) {
+    public void addUserEventListener(final ChatContract.UserActionListener presenter) {
         userReference.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(com.google.firebase.database.DataSnapshot dataSnapshot, String s) {
