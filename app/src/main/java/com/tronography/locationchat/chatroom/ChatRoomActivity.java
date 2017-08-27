@@ -19,8 +19,12 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.tronography.locationchat.BaseActivity;
 import com.tronography.locationchat.R;
-import com.tronography.locationchat.firebase.FirebaseMessageUtils;
-import com.tronography.locationchat.firebase.UserDao;
+import com.tronography.locationchat.database.MessageDoa;
+import com.tronography.locationchat.database.UserDao;
+import com.tronography.locationchat.database.firebase.MessageEventListener;
+import com.tronography.locationchat.database.firebase.UserEventListener;
+import com.tronography.locationchat.listeners.RetrieveMessageLogListener;
+import com.tronography.locationchat.listeners.RetrieveUserListener;
 import com.tronography.locationchat.login.LoginActivity;
 import com.tronography.locationchat.model.MessageModel;
 import com.tronography.locationchat.model.UserModel;
@@ -33,13 +37,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.tronography.locationchat.firebase.FirebaseMessageUtils.RetrieveMessageLogListener;
 import static com.tronography.locationchat.utils.EditTextUtils.clearText;
 import static com.tronography.locationchat.utils.ObjectUtils.isEmpty;
 import static com.tronography.locationchat.utils.ObjectUtils.isNull;
 
 public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
-        MessageAdapter.Listener, UserDao.RetrieveUserListener, RetrieveMessageLogListener {
+        MessageAdapter.Listener, RetrieveUserListener, RetrieveMessageLogListener {
 
     private static final String ROOM_ID_KEY = "room_id";
     private static final String ROOM_NAME_KEY = "room_name";
@@ -51,7 +54,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
     RecyclerView recyclerView;
 
     private UserModel user;
-    private FirebaseMessageUtils firebaseMessageUtils = new FirebaseMessageUtils();
+    private MessageDoa messageDoa = new MessageDoa();
     private String userID;
     private MessageAdapter adapter;
     private ArrayList<MessageModel> messageLog;
@@ -88,9 +91,12 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
         setupAdapter();
         setupList();
 
-        firebaseMessageUtils.addMessageChildEventListener(presenter, roomID);
+        MessageEventListener messageEventListener = new MessageEventListener();
+        messageEventListener.addMessageChildEventListener(presenter, roomID);
         Log.e(TAG, "onCreate: " + "MessageEventListenerAdded");
-        userDao.addUserEventListener(presenter);
+
+        UserEventListener userEventListener = new UserEventListener();
+        userEventListener.addUserChildEventListener(presenter);
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
 
@@ -160,7 +166,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
         super.onResume();
         Log.e(TAG, "onResume: " + userID);
         loadReturningUser(userID);
-        firebaseMessageUtils.retrieveMessagesFromFirebase(this, roomID);
+        messageDoa.getMessageLog(this, roomID);
     }
 
     @Override
@@ -200,7 +206,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
     public void sendMessage() {
         String message = editText.getText().toString();
         if (!isEmpty(message)) {
-            firebaseMessageUtils.addMessageToFirebaseDb(new MessageModel(message, user.getId(),
+            messageDoa.saveMessage(new MessageModel(message, user.getId(),
                     user.getUsername()), roomID);
             clearText(editText, this);
         }
@@ -222,7 +228,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
 
     @Override
     public void messagesOnChildChanged() {
-        firebaseMessageUtils.retrieveMessagesFromFirebase(this, roomID);
+        messageDoa.getMessageLog(this, roomID);
     }
 
     @Override

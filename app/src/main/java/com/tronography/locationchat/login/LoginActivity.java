@@ -18,17 +18,18 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.tronography.locationchat.BaseActivity;
 import com.tronography.locationchat.R;
-import com.tronography.locationchat.firebase.UserDao;
+import com.tronography.locationchat.database.UserDao;
+import com.tronography.locationchat.listeners.RetrieveUserListener;
 import com.tronography.locationchat.lobby.LobbyActivity;
 import com.tronography.locationchat.model.UserModel;
 import com.tronography.locationchat.utils.SharedPrefsUtils;
 import com.tronography.locationchat.utils.UsernameGenerator;
 
-import static com.tronography.locationchat.firebase.UserDao.RetrieveUserListener;
 import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_KEY;
 
 
-public class LoginActivity extends BaseActivity implements View.OnClickListener, RetrieveUserListener {
+public class LoginActivity extends BaseActivity implements View.OnClickListener,
+        RetrieveUserListener {
 
     private static final String TAG = "EmailPassword";
     private RetrieveUserListener retrieveUserListener;

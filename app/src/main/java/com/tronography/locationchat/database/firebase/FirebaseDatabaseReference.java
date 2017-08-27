@@ -1,4 +1,4 @@
-package com.tronography.locationchat.firebase;
+package com.tronography.locationchat.database.firebase;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -33,5 +33,9 @@ public class FirebaseDatabaseReference {
 
     public static DatabaseReference getUserReference() {
         return userReference;
+    }
+
+    public static DatabaseReference getChatRoomMessageRef(String roomID) {
+        return getMessageReference().child(roomID);
     }
 }

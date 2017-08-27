@@ -9,8 +9,9 @@ import android.widget.TextView;
 
 import com.tronography.locationchat.BaseActivity;
 import com.tronography.locationchat.R;
-import com.tronography.locationchat.firebase.UserDao;
-import com.tronography.locationchat.firebase.UpdateMessageSenderName;
+import com.tronography.locationchat.database.MessageDoa;
+import com.tronography.locationchat.database.UserDao;
+import com.tronography.locationchat.listeners.RetrieveUserListener;
 import com.tronography.locationchat.model.UserModel;
 import com.tronography.locationchat.utils.SharedPrefsUtils;
 
@@ -20,7 +21,7 @@ import butterknife.OnClick;
 
 import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_KEY;
 
-public class UserProfileActivity extends BaseActivity implements UserDao.RetrieveUserListener {
+public class UserProfileActivity extends BaseActivity implements RetrieveUserListener {
 
     private static final String TAG = UserProfileActivity.class.getSimpleName();
 
@@ -33,7 +34,9 @@ public class UserProfileActivity extends BaseActivity implements UserDao.Retriev
     @BindView(R.id.details_location_et)
     EditText locationDetailsET;
     private UserModel userModel;
-    private UserDao userDao = new UserDao();
+    private UserDao userDao;
+    MessageDoa messageDoa;
+
     public final static String SENDER_ID_KEY = "sender_id";
     private SharedPrefsUtils sharedPrefs;
 
@@ -42,7 +45,11 @@ public class UserProfileActivity extends BaseActivity implements UserDao.Retriev
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile);
         ButterKnife.bind(this);
+
         sharedPrefs = new SharedPrefsUtils(this);
+        userDao = new UserDao();
+        messageDoa = new MessageDoa();
+
         String userId = getIntent().getStringExtra(SENDER_ID_KEY);
         userDao.queryUserByID(userId, this);
     }
@@ -57,17 +64,13 @@ public class UserProfileActivity extends BaseActivity implements UserDao.Retriev
             editOptionTV.setText(R.string.edit);
             disableDetailsEditText();
             saveChanges();
-            UpdateMessageSenderName updateMessageSenderName = new UpdateMessageSenderName(userModel);
-            updateMessageSenderName.updateSenderName();
         }
     }
 
     private void saveChanges() {
+        messageDoa.updateSenderName(userModel);
         userDao.updateUsername(userModel, headerUsernameTV.getText().toString());
         userDao.updateBio(userModel, bioDetailsET.getText().toString());
-        if (CURRENT_USER_KEY.equals(userModel.getId())){
-            sharedPrefs.updateUsername(userModel);
-        }
     }
 
     private void enableDetailsEditText() {

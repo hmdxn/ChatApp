@@ -1,4 +1,4 @@
-package com.tronography.locationchat.firebase;
+package com.tronography.locationchat.database.firebase;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -15,15 +15,16 @@ import java.util.HashMap;
 import java.util.Objects;
 
 import static android.content.ContentValues.TAG;
-import static com.tronography.locationchat.firebase.FirebaseDatabaseReference.getChatRoomReference;
-import static com.tronography.locationchat.firebase.FirebaseDatabaseReference.getMessageReference;
+import static com.tronography.locationchat.database.firebase.FirebaseDatabaseReference.*;
+import static com.tronography.locationchat.database.firebase.FirebaseDatabaseReference.getChatRoomReference;
+import static com.tronography.locationchat.database.firebase.FirebaseDatabaseReference.getMessageReference;
 
 
 public class UpdateMessageSenderName {
 
     private UserModel userModel;
 
-    
+
     public UpdateMessageSenderName(UserModel userModel) {
         this.userModel = userModel;
     }
@@ -40,20 +41,21 @@ public class UpdateMessageSenderName {
                             .child(key)
                             .child("chatroom")
                             .getValue(ChatRoomModel.class);
-                    Log.e(TAG, "retrieveMessagesFromFirebase: " + chatroomModel.getName());
+                    Log.e(TAG, "getMessageLog: " + chatroomModel.getName());
                     updateMessageSenderName(userModel, chatroomModel.getId());
                 }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "onCancelled: " + databaseError.toString());
             }
 
         });
     }
 
     private void updateMessageSenderName(final UserModel userModel, final String roomID) {
-        getMessagesByChatRoomID(roomID).addListenerForSingleValueEvent(new ValueEventListener() {
+        getChatRoomMessageRef(roomID).addListenerForSingleValueEvent(new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -90,7 +92,7 @@ public class UpdateMessageSenderName {
     private void applySenderNameChangeInFirebase(String roomID, MessageModel messagModel, String newUserName) {
         //reference the unique key object in the database
         DatabaseReference messageRoot = getMessagesByChatRoomID(roomID).child(messagModel.getMessageId());
-        messagModel.setUsername(newUserName);
+        messagModel.setSenderName(newUserName);
         //now we must generate the children of this new object
         HashMap<String, Object> userModelMap = setDatabaseMessageValues(messagModel);
         //confirm changes

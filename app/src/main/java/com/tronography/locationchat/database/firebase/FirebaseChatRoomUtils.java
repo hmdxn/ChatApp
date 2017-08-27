@@ -1,4 +1,4 @@
-package com.tronography.locationchat.firebase;
+package com.tronography.locationchat.database.firebase;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -8,6 +8,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.tronography.locationchat.listeners.RetrieveChatRoomListener;
 import com.tronography.locationchat.lobby.LobbyContract;
 import com.tronography.locationchat.model.ChatRoomModel;
 
@@ -15,17 +16,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static android.content.ContentValues.TAG;
-import static com.tronography.locationchat.firebase.FirebaseDatabaseReference.getChatRoomReference;
-import static com.tronography.locationchat.firebase.FirebaseDatabaseReference.getMessageReference;
-import static com.tronography.locationchat.firebase.FirebaseDatabaseReference.getRoot;
+import static com.tronography.locationchat.database.firebase.FirebaseDatabaseReference.getChatRoomReference;
+import static com.tronography.locationchat.database.firebase.FirebaseDatabaseReference.getMessageReference;
+import static com.tronography.locationchat.database.firebase.FirebaseDatabaseReference.getRoot;
 import static com.tronography.locationchat.utils.ObjectUtils.isNull;
 
 
 public class FirebaseChatRoomUtils {
 
-
-
-
+    
     public void queryChatRoomByID(final String chatRoomId, final RetrieveChatRoomListener retrieveChatRoomListener) {
         getRoot().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -130,7 +129,7 @@ public class FirebaseChatRoomUtils {
                             .child(key)
                             .child("chatroom")
                             .getValue(ChatRoomModel.class);
-                    Log.e(TAG, "retrieveMessagesFromFirebase: " + chatroomModel.getName());
+                    Log.e(TAG, "getMessageLog: " + chatroomModel.getName());
                     chatRoomList.add(chatroomModel);
                 }
                 listener.onChatRoomListRetrieved(chatRoomList);
@@ -139,11 +138,5 @@ public class FirebaseChatRoomUtils {
             public void onCancelled(DatabaseError databaseError) {
             }
         });
-    }
-
-    public interface RetrieveChatRoomListener {
-        void onChatRoomListRetrieved(ArrayList<ChatRoomModel> chatRoomList);
-
-        void onChatRoomRetrieved(ChatRoomModel chatRoomModel);
     }
 }

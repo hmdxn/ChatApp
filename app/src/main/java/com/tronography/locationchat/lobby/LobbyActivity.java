@@ -16,8 +16,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.tronography.locationchat.BaseActivity;
 import com.tronography.locationchat.R;
 import com.tronography.locationchat.chatroom.ChatRoomActivity;
-import com.tronography.locationchat.firebase.FirebaseChatRoomUtils;
-import com.tronography.locationchat.firebase.UserDao;
+import com.tronography.locationchat.database.UserDao;
+import com.tronography.locationchat.database.firebase.FirebaseChatRoomUtils;
+import com.tronography.locationchat.listeners.RetrieveChatRoomListener;
+import com.tronography.locationchat.listeners.RetrieveUserListener;
 import com.tronography.locationchat.lobby.ChatRoomAdapter.Listener;
 import com.tronography.locationchat.login.LoginActivity;
 import com.tronography.locationchat.model.ChatRoomModel;
@@ -29,7 +31,8 @@ import java.util.ArrayList;
 import static com.tronography.locationchat.utils.ObjectUtils.isEmpty;
 
 
-public class LobbyActivity extends BaseActivity implements LobbyContract.View, Listener, FirebaseChatRoomUtils.RetrieveChatRoomListener, UserDao.RetrieveUserListener {
+public class LobbyActivity extends BaseActivity implements LobbyContract.View, Listener,
+        RetrieveChatRoomListener, RetrieveUserListener {
 
     FirebaseChatRoomUtils chatRoomUtils = new FirebaseChatRoomUtils();
 

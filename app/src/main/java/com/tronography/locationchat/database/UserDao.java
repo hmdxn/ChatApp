@@ -1,51 +1,24 @@
-package com.tronography.locationchat.firebase;
+package com.tronography.locationchat.database;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.tronography.locationchat.listeners.RetrieveUserListener;
-import com.tronography.locationchat.chatroom.ChatContract;
 import com.tronography.locationchat.model.UserModel;
 
 import java.util.HashMap;
 
 import static android.content.ContentValues.TAG;
-import static com.tronography.locationchat.firebase.FirebaseDatabaseReference.getRoot;
-import static com.tronography.locationchat.firebase.FirebaseDatabaseReference.getUserReference;
+import static com.tronography.locationchat.database.firebase.FirebaseDatabaseReference.getRoot;
+import static com.tronography.locationchat.database.firebase.FirebaseDatabaseReference.getUserReference;
 import static com.tronography.locationchat.utils.ObjectUtils.isNull;
 
 
 public class UserDao implements UserDaoContract {
-
-
-    public void addUserEventListener(final ChatContract.UserActionListener presenter) {
-        getUserReference().addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(com.google.firebase.database.DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        });
-    }
 
     @Override
     public void saveUser(UserModel userModel) {

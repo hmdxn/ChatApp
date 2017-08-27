@@ -70,7 +70,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         void bind(final MessageModel messageModel) {
             messageTV.setText(messageModel.getMessage());
             timestampTV.setText(messageModel.getTimeStamp());
-            usernameTV.setText(messageModel.getUsername());
+            usernameTV.setText(messageModel.getSenderName());
 
             if (Objects.equals(messageModel.getSenderId(), CURRENT_USER_KEY)){
                 usernameTV.setTextColor(Color.parseColor("#DB6B71"));
