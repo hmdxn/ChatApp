@@ -20,7 +20,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.tronography.locationchat.BaseActivity;
 import com.tronography.locationchat.R;
 import com.tronography.locationchat.firebase.FirebaseMessageUtils;
-import com.tronography.locationchat.firebase.FirebaseUserUtils;
+import com.tronography.locationchat.firebase.UserDao;
 import com.tronography.locationchat.login.LoginActivity;
 import com.tronography.locationchat.model.MessageModel;
 import com.tronography.locationchat.model.UserModel;
@@ -39,7 +39,7 @@ import static com.tronography.locationchat.utils.ObjectUtils.isEmpty;
 import static com.tronography.locationchat.utils.ObjectUtils.isNull;
 
 public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
-        MessageAdapter.Listener, FirebaseUserUtils.RetrieveUserListener, RetrieveMessageLogListener {
+        MessageAdapter.Listener, UserDao.RetrieveUserListener, RetrieveMessageLogListener {
 
     private static final String ROOM_ID_KEY = "room_id";
     private static final String ROOM_NAME_KEY = "room_name";
@@ -56,7 +56,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
     private MessageAdapter adapter;
     private ArrayList<MessageModel> messageLog;
     private ChatContract.UserActionListener presenter;
-    private FirebaseUserUtils firebaseUserUtils = new FirebaseUserUtils();
+    private UserDao userDao = new UserDao();
     private String roomID;
     private FirebaseAuth mAuth;
     private FirebaseUser firebaseUser;
@@ -90,7 +90,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
 
         firebaseMessageUtils.addMessageChildEventListener(presenter, roomID);
         Log.e(TAG, "onCreate: " + "MessageEventListenerAdded");
-        firebaseUserUtils.addUserEventListener(presenter);
+        userDao.addUserEventListener(presenter);
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
 
@@ -104,7 +104,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
         setTitle(" Room : " + roomName);
 
         if (!isNull(userID)) {
-            firebaseUserUtils.queryUserByID(userID, this);
+            userDao.queryUserByID(userID, this);
         }
     }
 
@@ -131,7 +131,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
 
     private void loadReturningUser(String userID) {
         SharedPrefsUtils.CURRENT_USER_KEY = userID;
-        firebaseUserUtils.queryUserByID(userID, this);
+        userDao.queryUserByID(userID, this);
     }
 
     public void launchLoginActivity() {
@@ -227,7 +227,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
 
     @Override
     public void launchUserProfileActivity(String senderID) {
-        Intent intent = UserProfileActivity.provideIntent(this, senderID, roomID);
+        Intent intent = UserProfileActivity.provideIntent(this, senderID);
         startActivity(intent);
     }
 

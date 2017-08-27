@@ -17,7 +17,7 @@ import com.tronography.locationchat.BaseActivity;
 import com.tronography.locationchat.R;
 import com.tronography.locationchat.chatroom.ChatRoomActivity;
 import com.tronography.locationchat.firebase.FirebaseChatRoomUtils;
-import com.tronography.locationchat.firebase.FirebaseUserUtils;
+import com.tronography.locationchat.firebase.UserDao;
 import com.tronography.locationchat.lobby.ChatRoomAdapter.Listener;
 import com.tronography.locationchat.login.LoginActivity;
 import com.tronography.locationchat.model.ChatRoomModel;
@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import static com.tronography.locationchat.utils.ObjectUtils.isEmpty;
 
 
-public class LobbyActivity extends BaseActivity implements LobbyContract.View, Listener, FirebaseChatRoomUtils.RetrieveChatRoomListener, FirebaseUserUtils.RetrieveUserListener {
+public class LobbyActivity extends BaseActivity implements LobbyContract.View, Listener, FirebaseChatRoomUtils.RetrieveChatRoomListener, UserDao.RetrieveUserListener {
 
     FirebaseChatRoomUtils chatRoomUtils = new FirebaseChatRoomUtils();
 
@@ -43,7 +43,7 @@ public class LobbyActivity extends BaseActivity implements LobbyContract.View, L
     private FirebaseAuth mAuth;
     private FirebaseUser firebaseUser;
     private String userID;
-    private FirebaseUserUtils firebaseUserUtils = new FirebaseUserUtils();
+    private UserDao userDao = new UserDao();
     private UserModel user;
 
     @Override
@@ -98,7 +98,7 @@ public class LobbyActivity extends BaseActivity implements LobbyContract.View, L
     @Override
     public void loadReturningUser(String userID) {
         SharedPrefsUtils.CURRENT_USER_KEY = userID;
-        firebaseUserUtils.queryUserByID(userID, this);
+        userDao.queryUserByID(userID, this);
     }
 
     @Override

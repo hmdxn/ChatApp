@@ -18,13 +18,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.tronography.locationchat.BaseActivity;
 import com.tronography.locationchat.R;
-import com.tronography.locationchat.firebase.FirebaseUserUtils;
+import com.tronography.locationchat.firebase.UserDao;
 import com.tronography.locationchat.lobby.LobbyActivity;
 import com.tronography.locationchat.model.UserModel;
 import com.tronography.locationchat.utils.SharedPrefsUtils;
 import com.tronography.locationchat.utils.UsernameGenerator;
 
-import static com.tronography.locationchat.firebase.FirebaseUserUtils.RetrieveUserListener;
+import static com.tronography.locationchat.firebase.UserDao.RetrieveUserListener;
 import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_KEY;
 
 
@@ -38,7 +38,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     private EditText mEmailField;
     private EditText mPasswordField;
 
-    private FirebaseUserUtils firebaseUserUtils;
+    private UserDao userDao;
     private UsernameGenerator usernameGenerator = new UsernameGenerator();
     private SharedPrefsUtils sharedPrefs;
 
@@ -51,7 +51,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         setContentView(R.layout.activity_login);
         retrieveUserListener = this;
         sharedPrefs = new SharedPrefsUtils(this);
-        firebaseUserUtils = new FirebaseUserUtils();
+        userDao = new UserDao();
 
         mStatusTextView = (TextView) findViewById(R.id.status);
         mDetailTextView = (TextView) findViewById(R.id.detail);
@@ -144,7 +144,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         CURRENT_USER_KEY = user.getId();
         sharedPrefs.setHasSenderId(true);
         sharedPrefs.setSharedPreferencesUserId(user.getId());
-        firebaseUserUtils.addUserToFirebase(user);
+        userDao.saveUser(user);
     }
 
     private void signIn(String email, String password) {
@@ -164,7 +164,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                             Log.d(TAG, "signInWithEmail:success");
                             firebaseUser = mAuth.getCurrentUser();
                             updateUI(firebaseUser);
-                            firebaseUserUtils.queryUserByID(firebaseUser.getUid(), retrieveUserListener);
+                            userDao.queryUserByID(firebaseUser.getUid(), retrieveUserListener);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());

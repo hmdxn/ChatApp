@@ -18,14 +18,12 @@ import static android.content.ContentValues.TAG;
 import static com.tronography.locationchat.firebase.FirebaseDatabaseReference.getChatRoomReference;
 import static com.tronography.locationchat.firebase.FirebaseDatabaseReference.getMessageReference;
 
-/**
- * Created by jonathancolon on 8/26/17.
- */
 
 public class UpdateMessageSenderName {
 
     private UserModel userModel;
 
+    
     public UpdateMessageSenderName(UserModel userModel) {
         this.userModel = userModel;
     }

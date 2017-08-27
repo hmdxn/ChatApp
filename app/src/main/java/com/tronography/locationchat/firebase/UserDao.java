@@ -8,6 +8,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.tronography.locationchat.listeners.RetrieveUserListener;
 import com.tronography.locationchat.chatroom.ChatContract;
 import com.tronography.locationchat.model.UserModel;
 
@@ -19,31 +20,8 @@ import static com.tronography.locationchat.firebase.FirebaseDatabaseReference.ge
 import static com.tronography.locationchat.utils.ObjectUtils.isNull;
 
 
-public class FirebaseUserUtils {
+public class UserDao implements UserDaoContract {
 
-
-    public void queryUserByID(final String userId, final RetrieveUserListener retrieveUserListener) {
-        getRoot().addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                UserModel userModel = dataSnapshot
-                        .child("members")
-                        .child(userId)
-                        .child("user_model")
-                        .getValue(UserModel.class);
-                if (!isNull(userModel)) {
-                    retrieveUserListener.onUserRetrieved(userModel);
-                } else {
-                    Log.e(TAG, "onDataChange: " + "that key does not exist");
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e(TAG, "onCancelled: " + databaseError.toString());
-            }
-        });
-    }
 
     public void addUserEventListener(final ChatContract.UserActionListener presenter) {
         getUserReference().addChildEventListener(new ChildEventListener() {
@@ -69,10 +47,63 @@ public class FirebaseUserUtils {
         });
     }
 
-    public void applyBioDetailsInFireBase(UserModel userObject, String bio) {
+    @Override
+    public void saveUser(UserModel userModel) {
+        //creates a unique key identifier
+        HashMap<String, Object> uniqueMemberIdentifier = new HashMap<>();
+        //appends root with unique key
+        getUserReference().updateChildren(uniqueMemberIdentifier);
+
+        //reference the unique key object in the database
+        DatabaseReference memberRoot = getUserReference().child(userModel.getId());
+
+        //now we must generate the children of this new object
+        HashMap<String, Object> userModelMap = setDatabaseUserValues(userModel);
+
+        //confirm changes
+        memberRoot.updateChildren(userModelMap);
+    }
+
+    @Override
+    public void updateBio(UserModel userModel, String bio) {
+        //reference the unique key object in the database
+        DatabaseReference memberRoot = getUserReference().child(userModel.getId());
+        userModel.setBio(bio);
+        //now we must generate the children of this new object
+        HashMap<String, Object> userModelMap = setDatabaseUserValues(userModel);
+        //confirm changes
+        memberRoot.updateChildren(userModelMap);
+    }
+
+    @Override
+    public void queryUserByID(final String userId, final RetrieveUserListener retrieveUserListener) {
+        getRoot().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                UserModel userModel = dataSnapshot
+                        .child("members")
+                        .child(userId)
+                        .child("user_model")
+                        .getValue(UserModel.class);
+                if (!isNull(userModel)) {
+                    retrieveUserListener.onUserRetrieved(userModel);
+                } else {
+                    Log.e(TAG, "onDataChange: " + "that key does not exist");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "onCancelled: " + databaseError.toString());
+            }
+        });
+    }
+
+    @Override
+    public void updateUsername(UserModel userObject, String newUsername) {
         //reference the unique key object in the database
         DatabaseReference memberRoot = getUserReference().child(userObject.getId());
-        userObject.setBio(bio);
+        userObject.setUsername(newUsername);
         //now we must generate the children of this new object
         HashMap<String, Object> userModelMap = setDatabaseUserValues(userObject);
         //confirm changes
@@ -80,40 +111,9 @@ public class FirebaseUserUtils {
     }
 
     @NonNull
-    private HashMap<String, Object> setDatabaseUserValues(UserModel userObject) {
+    private HashMap<String, Object> setDatabaseUserValues(UserModel userModel) {
         HashMap<String, Object> userModelMap = new HashMap<>();
-        userModelMap.put("user_model", userObject);
+        userModelMap.put("user_model", userModel);
         return userModelMap;
-    }
-
-    public void applyNewUsernameInFireBase(UserModel userObject, String newUserName) {
-        //reference the unique key object in the database
-        DatabaseReference memberRoot = getUserReference().child(userObject.getId());
-        userObject.setUsername(newUserName);
-        //now we must generate the children of this new object
-        HashMap<String, Object> userModelMap = setDatabaseUserValues(userObject);
-        //confirm changes
-        memberRoot.updateChildren(userModelMap);
-    }
-
-    public void addUserToFirebase(UserModel userObject) {
-        //creates a unique key identifier
-        HashMap<String, Object> uniqueMemberIdentifier = new HashMap<>();
-
-        //appends root with unique key
-        getUserReference().updateChildren(uniqueMemberIdentifier);
-
-        //reference the unique key object in the database
-        DatabaseReference memberRoot = getUserReference().child(userObject.getId());
-
-        //now we must generate the children of this new object
-        HashMap<String, Object> userModelMap = setDatabaseUserValues(userObject);
-
-        //confirm changes
-        memberRoot.updateChildren(userModelMap);
-    }
-
-    public interface RetrieveUserListener {
-        void onUserRetrieved(UserModel userModel);
     }
 }

@@ -23,14 +23,6 @@ import static com.tronography.locationchat.utils.ObjectUtils.isNull;
 
 public class FirebaseMessageUtils {
 
-    private HashMap<String, UserModel> userMap = new HashMap<>();
-
-    public FirebaseMessageUtils() {
-    }
-
-    public HashMap<String, UserModel> getUserMap() {
-        return userMap;
-    }
 
     public void addMessageToFirebaseDb(MessageModel messageModel, String roomID) {
         //creates a unique key identifier
