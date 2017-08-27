@@ -1,5 +1,6 @@
 package com.tronography.locationchat.lobby;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,20 +10,26 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.tronography.locationchat.BaseActivity;
 import com.tronography.locationchat.R;
 import com.tronography.locationchat.chatroom.ChatRoomActivity;
 import com.tronography.locationchat.firebase.FirebaseChatRoomUtils;
+import com.tronography.locationchat.firebase.FirebaseUserUtils;
 import com.tronography.locationchat.lobby.ChatRoomAdapter.Listener;
+import com.tronography.locationchat.login.LoginActivity;
 import com.tronography.locationchat.model.ChatRoomModel;
+import com.tronography.locationchat.model.UserModel;
+import com.tronography.locationchat.utils.SharedPrefsUtils;
 
 import java.util.ArrayList;
 
 import static com.tronography.locationchat.utils.ObjectUtils.isEmpty;
 
 
-public class LobbyActivity extends BaseActivity implements LobbyContract.View, Listener, FirebaseChatRoomUtils.RetrieveChatRoomListener {
+public class LobbyActivity extends BaseActivity implements LobbyContract.View, Listener, FirebaseChatRoomUtils.RetrieveChatRoomListener, FirebaseUserUtils.RetrieveUserListener {
 
     FirebaseChatRoomUtils chatRoomUtils = new FirebaseChatRoomUtils();
 
@@ -33,11 +40,20 @@ public class LobbyActivity extends BaseActivity implements LobbyContract.View, L
     private ArrayList<ChatRoomModel> chatRoomList;
     private ChatRoomAdapter adapter;
     private RecyclerView chatRoomRV;
+    private FirebaseAuth mAuth;
+    private FirebaseUser firebaseUser;
+    private String userID;
+    private FirebaseUserUtils firebaseUserUtils = new FirebaseUserUtils();
+    private UserModel user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lobby);
+
+        // [START initialize_auth]
+        mAuth = FirebaseAuth.getInstance();
+        // [END initialize_auth]
 
         initializePresenter();
         chatRoomRV = (RecyclerView) findViewById(R.id.chatroom_rv);
@@ -57,17 +73,54 @@ public class LobbyActivity extends BaseActivity implements LobbyContract.View, L
         chatRoomUtils.addChatRoomEventListener(presenter);
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        checkIfUserIsLoggedIn();
+    }
+
+    private void checkIfUserIsLoggedIn() {
+        firebaseUser = mAuth.getCurrentUser();
+        updateUI(firebaseUser);
+    }
+
+    @Override
+    public void updateUI(FirebaseUser user) {
+        hideProgressDialog();
+        if (user != null) {
+            userID = user.getUid();
+            loadReturningUser(userID);
+        } else {
+            launchLoginActivity();
+        }
+    }
+
+    @Override
+    public void loadReturningUser(String userID) {
+        SharedPrefsUtils.CURRENT_USER_KEY = userID;
+        firebaseUserUtils.queryUserByID(userID, this);
+    }
+
+    @Override
+    public void launchLoginActivity() {
+        Intent intent = LoginActivity.provideIntent(this);
+        startActivity(intent);
+        finish();
+    }
+
     private void initializePresenter() {
         if (presenter == null) presenter = new LobbyPresenter(this);
     }
 
-    private void setupAdapter() {
+    @Override
+    public void setupAdapter() {
         chatRoomList = new ArrayList<>();
         adapter = new ChatRoomAdapter(this);
         adapter.setData(chatRoomList);
     }
 
-    private void setupList() {
+    @Override
+    public void setupList() {
         chatRoomRV.setLayoutManager(new LinearLayoutManager(chatRoomRV.getContext()));
         chatRoomRV.setAdapter(adapter);
     }
@@ -119,6 +172,7 @@ public class LobbyActivity extends BaseActivity implements LobbyContract.View, L
         refreshChatRoomRecyclerView(chatRoomList);
     }
 
+    @Override
     public void refreshChatRoomRecyclerView(ArrayList<ChatRoomModel> chatRoomList) {
         ChatRoomAdapter adapter = (ChatRoomAdapter) chatRoomRV.getAdapter();
         adapter.setData(chatRoomList);
@@ -127,5 +181,14 @@ public class LobbyActivity extends BaseActivity implements LobbyContract.View, L
     @Override
     public void onChatRoomRetrieved(ChatRoomModel chatRoomModel) {
         //// TODO: 8/23/17 no reason for querying a single chatroom at this time.
+    }
+
+    @Override
+    public void onUserRetrieved(UserModel userModel) {
+        user = userModel;
+    }
+
+    public static Intent provideIntent(Context context) {
+        return new Intent(context, LobbyActivity.class);
     }
 }

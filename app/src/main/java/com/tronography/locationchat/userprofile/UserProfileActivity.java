@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.tronography.locationchat.R;
 import com.tronography.locationchat.firebase.FirebaseMessageUtils;
 import com.tronography.locationchat.firebase.FirebaseUserUtils;
+import com.tronography.locationchat.firebase.UpdateMessageSenderName;
 import com.tronography.locationchat.model.UserModel;
 import com.tronography.locationchat.utils.SharedPrefsUtils;
 
@@ -35,7 +36,9 @@ public class UserProfileActivity extends AppCompatActivity implements FirebaseUs
     FirebaseUserUtils firebaseUserUtils = new FirebaseUserUtils();
     FirebaseMessageUtils firebaseMessageUtils = new FirebaseMessageUtils();
     public final static String SENDER_ID_KEY = "sender_id";
+    private static final String ROOM_ID_KEY = "room_id";
     private SharedPrefsUtils sharedPrefs;
+    private String roomID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +48,7 @@ public class UserProfileActivity extends AppCompatActivity implements FirebaseUs
 
         sharedPrefs = new SharedPrefsUtils(this);
         String userId = getIntent().getStringExtra(SENDER_ID_KEY);
+        roomID = getIntent().getStringExtra(ROOM_ID_KEY);
         firebaseUserUtils.queryUserByID(userId, this);
     }
 
@@ -58,7 +62,8 @@ public class UserProfileActivity extends AppCompatActivity implements FirebaseUs
             editOptionTV.setText(R.string.edit);
             disableDetailsEditText();
             saveChanges();
-            firebaseMessageUtils.updateMessageSenderUsernames(userModel);
+            UpdateMessageSenderName updateMessageSenderName = new UpdateMessageSenderName(userModel);
+            updateMessageSenderName.updateSenderName();
         }
     }
 
@@ -92,9 +97,10 @@ public class UserProfileActivity extends AppCompatActivity implements FirebaseUs
         }
     }
 
-    public static Intent provideIntent(Context context, String userName) {
+    public static Intent provideIntent(Context context, String userName, String roomID) {
         Intent intent = new Intent(context, UserProfileActivity.class);
         intent.putExtra(SENDER_ID_KEY, userName);
+        intent.putExtra(ROOM_ID_KEY, roomID);
         return intent;
     }
 

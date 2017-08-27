@@ -7,7 +7,6 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.tronography.locationchat.chatroom.ChatContract;
 import com.tronography.locationchat.model.UserModel;
@@ -15,17 +14,16 @@ import com.tronography.locationchat.model.UserModel;
 import java.util.HashMap;
 
 import static android.content.ContentValues.TAG;
+import static com.tronography.locationchat.firebase.FirebaseDatabaseReference.getRoot;
+import static com.tronography.locationchat.firebase.FirebaseDatabaseReference.getUserReference;
 import static com.tronography.locationchat.utils.ObjectUtils.isNull;
 
 
 public class FirebaseUserUtils {
 
-    private FirebaseDatabase database = FirebaseDatabase.getInstance();
-    private DatabaseReference root = database.getReference();
-    private DatabaseReference userReference = database.getReference("members");
 
     public void queryUserByID(final String userId, final RetrieveUserListener retrieveUserListener) {
-        root.addListenerForSingleValueEvent(new ValueEventListener() {
+        getRoot().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 UserModel userModel = dataSnapshot
@@ -48,7 +46,7 @@ public class FirebaseUserUtils {
     }
 
     public void addUserEventListener(final ChatContract.UserActionListener presenter) {
-        userReference.addChildEventListener(new ChildEventListener() {
+        getUserReference().addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(com.google.firebase.database.DataSnapshot dataSnapshot, String s) {
             }
@@ -73,7 +71,7 @@ public class FirebaseUserUtils {
 
     public void applyBioDetailsInFireBase(UserModel userObject, String bio) {
         //reference the unique key object in the database
-        DatabaseReference memberRoot = userReference.child(userObject.getId());
+        DatabaseReference memberRoot = getUserReference().child(userObject.getId());
         userObject.setBio(bio);
         //now we must generate the children of this new object
         HashMap<String, Object> userModelMap = setDatabaseUserValues(userObject);
@@ -90,7 +88,7 @@ public class FirebaseUserUtils {
 
     public void applyNewUsernameInFireBase(UserModel userObject, String newUserName) {
         //reference the unique key object in the database
-        DatabaseReference memberRoot = userReference.child(userObject.getId());
+        DatabaseReference memberRoot = getUserReference().child(userObject.getId());
         userObject.setUsername(newUserName);
         //now we must generate the children of this new object
         HashMap<String, Object> userModelMap = setDatabaseUserValues(userObject);
@@ -103,10 +101,10 @@ public class FirebaseUserUtils {
         HashMap<String, Object> uniqueMemberIdentifier = new HashMap<>();
 
         //appends root with unique key
-        userReference.updateChildren(uniqueMemberIdentifier);
+        getUserReference().updateChildren(uniqueMemberIdentifier);
 
         //reference the unique key object in the database
-        DatabaseReference memberRoot = userReference.child(userObject.getId());
+        DatabaseReference memberRoot = getUserReference().child(userObject.getId());
 
         //now we must generate the children of this new object
         HashMap<String, Object> userModelMap = setDatabaseUserValues(userObject);

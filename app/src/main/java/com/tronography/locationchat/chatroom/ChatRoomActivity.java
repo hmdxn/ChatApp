@@ -2,6 +2,7 @@ package com.tronography.locationchat.chatroom;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,9 +16,7 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.tronography.locationchat.BaseActivity;
 import com.tronography.locationchat.R;
 import com.tronography.locationchat.firebase.FirebaseMessageUtils;
@@ -35,16 +34,17 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static com.tronography.locationchat.firebase.FirebaseMessageUtils.RetrieveMessageLogListener;
-import static com.tronography.locationchat.userprofile.UserProfileActivity.SENDER_ID_KEY;
 import static com.tronography.locationchat.utils.EditTextUtils.clearText;
 import static com.tronography.locationchat.utils.ObjectUtils.isEmpty;
 import static com.tronography.locationchat.utils.ObjectUtils.isNull;
-import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_KEY;
 
-public class ChatRoomActivity extends BaseActivity implements ChatContract.View, ChildEventListener,
+public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
         MessageAdapter.Listener, FirebaseUserUtils.RetrieveUserListener, RetrieveMessageLogListener {
 
+    private static final String ROOM_ID_KEY = "room_id";
+    private static final String ROOM_NAME_KEY = "room_name";
     private final String TAG = ChatRoomActivity.class.getSimpleName();
+
     @BindView(R.id.chat_input_et)
     EditText editText;
     @BindView(R.id.recycler_view)
@@ -57,22 +57,13 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
     private ArrayList<MessageModel> messageLog;
     private ChatContract.UserActionListener presenter;
     private FirebaseUserUtils firebaseUserUtils = new FirebaseUserUtils();
-    private SharedPrefsUtils sharedPrefsUtils;
     private String roomID;
-    private static final String ROOM_ID_KEY = "room_id";
-    private static final String ROOM_NAME_KEY = "room_name";
-
-
-    // [START declare_auth]
     private FirebaseAuth mAuth;
     private FirebaseUser firebaseUser;
     private String roomName;
-    // [END declare_auth]
 
-    public static Intent provideIntent(Context context, String userID) {
-        Intent intent = new Intent(context, ChatRoomActivity.class);
-        intent.putExtra(SENDER_ID_KEY, userID);
-        return intent;
+    public static Intent provideIntent(Context context) {
+        return new Intent(context, ChatRoomActivity.class);
     }
 
     public static Intent provideIntent(Context context, String roomID, String roomName) {
@@ -88,9 +79,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
         setContentView(R.layout.chatroom_activity);
         ButterKnife.bind(this);
 
-        // [START initialize_auth]
         mAuth = FirebaseAuth.getInstance();
-        // [END initialize_auth]
 
         roomID = getIntent().getStringExtra(ROOM_ID_KEY);
         roomName = getIntent().getStringExtra(ROOM_NAME_KEY);
@@ -104,6 +93,12 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
         firebaseUserUtils.addUserEventListener(presenter);
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+
+        //todo Make more efficent. Perhaps extract this to another class?
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            myToolbar.setTitleTextColor(getColor(R.color.light_font));
+        }
+
         setSupportActionBar(myToolbar);
 
         setTitle(" Room : " + roomName);
@@ -112,9 +107,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
             firebaseUserUtils.queryUserByID(userID, this);
         }
     }
-    // [END on_start_check_user]
 
-    // [START on_start_check_user]
     @Override
     public void onStart() {
         super.onStart();
@@ -137,7 +130,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
     }
 
     private void loadReturningUser(String userID) {
-        CURRENT_USER_KEY = userID;
+        SharedPrefsUtils.CURRENT_USER_KEY = userID;
         firebaseUserUtils.queryUserByID(userID, this);
     }
 
@@ -192,7 +185,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
 
     @Override
     public void onMessageLogReceived(ArrayList<MessageModel> refreshedMessageLog) {
-        Log.e(TAG, "onMessageLogReceived: " + "RECEIVED" );
+        Log.e(TAG, "onMessageLogReceived: " + "RECEIVED");
         messageLog = refreshedMessageLog;
         System.out.println("refreshedMessageLog = " + refreshedMessageLog);
         refreshMessageRecyclerView(messageLog);
@@ -206,7 +199,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
     @Override
     public void sendMessage() {
         String message = editText.getText().toString();
-        if (!isEmpty(message)){
+        if (!isEmpty(message)) {
             firebaseMessageUtils.addMessageToFirebaseDb(new MessageModel(message, user.getId(),
                     user.getUsername()), roomID);
             clearText(editText, this);
@@ -234,7 +227,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
 
     @Override
     public void launchUserProfileActivity(String senderID) {
-        Intent intent = UserProfileActivity.provideIntent(this, senderID);
+        Intent intent = UserProfileActivity.provideIntent(this, senderID, roomID);
         startActivity(intent);
     }
 
@@ -247,28 +240,6 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
     public void signOut() {
         mAuth.signOut();
         updateUI(null);
-    }
-
-    @Override
-    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-        presenter.messagesOnChildAdded(dataSnapshot, s);
-    }
-
-    @Override
-    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-        presenter.childChanged(dataSnapshot, s);
-    }
-
-    @Override
-    public void onChildRemoved(DataSnapshot dataSnapshot) {
-    }
-
-    @Override
-    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-    }
-
-    @Override
-    public void onCancelled(DatabaseError databaseError) {
     }
 
     @Override
