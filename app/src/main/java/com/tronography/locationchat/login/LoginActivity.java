@@ -18,37 +18,42 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.tronography.locationchat.BaseActivity;
 import com.tronography.locationchat.R;
-import com.tronography.locationchat.chatroom.ChatRoomActivity;
-import com.tronography.locationchat.firebase.FirebaseUserUtils;
+import com.tronography.locationchat.database.UserDao;
+import com.tronography.locationchat.listeners.RetrieveUserListener;
+import com.tronography.locationchat.lobby.LobbyActivity;
 import com.tronography.locationchat.model.UserModel;
 import com.tronography.locationchat.utils.SharedPrefsUtils;
 import com.tronography.locationchat.utils.UsernameGenerator;
 
-import static com.tronography.locationchat.firebase.FirebaseUserUtils.*;
+import butterknife.BindView;
+
+import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_KEY;
 
 
-public class LoginActivity extends BaseActivity implements View.OnClickListener, RetrieveUserListener {
+public class LoginActivity extends BaseActivity implements View.OnClickListener,
+        RetrieveUserListener {
 
     private static final String TAG = "EmailPassword";
     private RetrieveUserListener retrieveUserListener;
 
-    // [START Views]
-    private TextView mStatusTextView;
-    private TextView mDetailTextView;
-    private EditText mEmailField;
-    private EditText mPasswordField;
-    // [END Views]
+    @BindView(R.id.status)
+    TextView mStatusTextView;
 
-    // [START utilities]
-    private FirebaseUserUtils firebaseUserUtils;
-    private UsernameGenerator usernameGenerator = new UsernameGenerator();
+    @BindView(R.id.detail)
+    TextView mDetailTextView;
+
+    @BindView(R.id.field_email)
+    EditText mEmailField;
+
+    @BindView(R.id.field_password)
+    EditText mPasswordField;
+
+    private UserDao userDao;
+    private UsernameGenerator usernameGenerator;
     private SharedPrefsUtils sharedPrefs;
-    // [END utilities]
 
-    // [START declare_auth]
     private FirebaseAuth mAuth;
     private FirebaseUser firebaseUser;
-    // [END declare_auth]
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,36 +61,30 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         setContentView(R.layout.activity_login);
         retrieveUserListener = this;
         sharedPrefs = new SharedPrefsUtils(this);
-        firebaseUserUtils = new FirebaseUserUtils();
+        userDao = new UserDao();
 
-        // Views
         mStatusTextView = (TextView) findViewById(R.id.status);
         mDetailTextView = (TextView) findViewById(R.id.detail);
         mEmailField = (EditText) findViewById(R.id.field_email);
         mPasswordField = (EditText) findViewById(R.id.field_password);
 
-        // Buttons
         findViewById(R.id.email_sign_in_button).setOnClickListener(this);
         findViewById(R.id.email_create_account_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
         findViewById(R.id.verify_email_button).setOnClickListener(this);
 
-        // [START initialize_auth]
         mAuth = FirebaseAuth.getInstance();
-        // [END initialize_auth]
     }
 
-    // [START on_start_check_user]
     @Override
     public void onStart() {
         super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
         firebaseUser = mAuth.getCurrentUser();
         updateUI(firebaseUser);
     }
-    // [END on_start_check_user]
 
     private void updateUI(FirebaseUser user) {
+        Log.e(TAG, "updateUI: " + "CALLED" );
         hideProgressDialog();
         if (user != null) {
             mStatusTextView.setText(getString(R.string.emailpassword_status_fmt,
@@ -96,7 +95,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             findViewById(R.id.email_password_fields).setVisibility(View.GONE);
             findViewById(R.id.signed_in_buttons).setVisibility(View.VISIBLE);
             findViewById(R.id.verify_email_button).setEnabled(!user.isEmailVerified());
-            launchChatRoomActivity(user.getUid());
+            launchLobbyActivity(this);
         } else {
             mStatusTextView.setText(R.string.signed_out);
             mDetailTextView.setText(null);
@@ -107,15 +106,15 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         }
     }
 
-    public void launchChatRoomActivity(String senderID) {
-        Intent intent = ChatRoomActivity.provideIntent(this, senderID);
+    public void launchLobbyActivity(Context context) {
+        Log.e(TAG, "launchLobbyActivity: called");
+        Intent intent = LobbyActivity.provideIntent(context);
         startActivity(intent);
         finish();
     }
 
     public static Intent provideIntent(Context context) {
-        Intent intent = new Intent(context, LoginActivity.class);
-        return intent;
+        return new Intent(context, LoginActivity.class);
     }
 
     private void createAccount(String email, String password) {
@@ -126,7 +125,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
         showProgressDialog();
 
-        // [START create_user_with_email]
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -136,6 +134,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                             Log.d(TAG, "createUserWithEmail:success");
                             firebaseUser = mAuth.getCurrentUser();
                             updateUI(firebaseUser);
+                            usernameGenerator = new UsernameGenerator();
                             configureNewUser(usernameGenerator.generateTempUsername(), firebaseUser.getUid());
                         } else {
                             // If sign in fails, display a message to the user.
@@ -145,21 +144,18 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                             updateUI(null);
                         }
 
-                        // [START_EXCLUDE]
                         hideProgressDialog();
-                        // [END_EXCLUDE]
                     }
                 });
-        // [END create_user_with_email]
 
     }
 
     private void configureNewUser(String username, String uid) {
         UserModel user = new UserModel(username, uid);
-        SharedPrefsUtils.CURRENT_USER_KEY = user.getId();
+        CURRENT_USER_KEY = user.getId();
         sharedPrefs.setHasSenderId(true);
         sharedPrefs.setSharedPreferencesUserId(user.getId());
-        firebaseUserUtils.addUserToFirebase(user);
+        userDao.saveUser(user);
     }
 
     private void signIn(String email, String password) {
@@ -170,7 +166,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
         showProgressDialog();
 
-        // [START sign_in_with_email]
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -180,7 +175,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                             Log.d(TAG, "signInWithEmail:success");
                             firebaseUser = mAuth.getCurrentUser();
                             updateUI(firebaseUser);
-                            firebaseUserUtils.queryUserByID(firebaseUser.getUid(), retrieveUserListener);
+                            userDao.queryUserByID(firebaseUser.getUid(), retrieveUserListener);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
@@ -189,15 +184,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                             updateUI(null);
                         }
 
-                        // [START_EXCLUDE]
                         if (!task.isSuccessful()) {
                             mStatusTextView.setText(R.string.auth_failed);
                         }
                         hideProgressDialog();
-                        // [END_EXCLUDE]
                     }
                 });
-        // [END sign_in_with_email]
     }
 
     private void signOut() {
@@ -212,12 +204,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         // Send verification email
         // [START send_email_verification]
         final FirebaseUser user = mAuth.getCurrentUser();
+        assert user != null;
         user.sendEmailVerification()
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        // [START_EXCLUDE]
-                        // Re-enable button
                         findViewById(R.id.verify_email_button).setEnabled(true);
 
                         if (task.isSuccessful()) {
@@ -227,13 +218,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                         } else {
                             Log.e(TAG, "sendEmailVerification", task.getException());
                             Toast.makeText(LoginActivity.this,
-                                    "Failed to send verification email.",
+                                    "Failed to addRoomClicked verification email.",
                                     Toast.LENGTH_SHORT).show();
                         }
-                        // [END_EXCLUDE]
                     }
                 });
-        // [END send_email_verification]
     }
 
     private boolean validateForm() {
@@ -275,7 +264,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     @Override
     public void onUserRetrieved(UserModel userModel) {
         Toast.makeText(this, userModel.getUsername() + " signed in", Toast.LENGTH_SHORT).show();
-        launchChatRoomActivity(userModel.getId());
+        CURRENT_USER_KEY = userModel.getId();
     }
 
     @Override

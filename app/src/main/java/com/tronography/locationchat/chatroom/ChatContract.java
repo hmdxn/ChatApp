@@ -10,9 +10,9 @@ public class ChatContract {
 
         void sendMessage();
 
-        void fireBaseOnChildAdded(DataSnapshot dataSnapshot, String s);
+        void messagesOnChildAdded(DataSnapshot dataSnapshot, String s);
 
-        void fireBaseOnChildChanged();
+        void messagesOnChildChanged();
 
         void launchUserProfileActivity(String senderID);
 
@@ -25,7 +25,7 @@ public class ChatContract {
 
         void send();
 
-        void childAdded(DataSnapshot dataSnapshot, String s);
+        void messagesOnChildAdded(DataSnapshot dataSnapshot, String s);
 
         void childChanged(DataSnapshot dataSnapshot, String s);
 

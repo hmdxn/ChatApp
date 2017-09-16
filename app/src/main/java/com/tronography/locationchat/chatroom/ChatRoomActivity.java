@@ -2,6 +2,7 @@ package com.tronography.locationchat.chatroom;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,13 +16,15 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.tronography.locationchat.BaseActivity;
 import com.tronography.locationchat.R;
-import com.tronography.locationchat.firebase.FirebaseMessageUtils;
-import com.tronography.locationchat.firebase.FirebaseUserUtils;
+import com.tronography.locationchat.database.MessageDoa;
+import com.tronography.locationchat.database.UserDao;
+import com.tronography.locationchat.database.firebase.MessageEventListener;
+import com.tronography.locationchat.database.firebase.UserEventListener;
+import com.tronography.locationchat.listeners.RetrieveMessageLogListener;
+import com.tronography.locationchat.listeners.RetrieveUserListener;
 import com.tronography.locationchat.login.LoginActivity;
 import com.tronography.locationchat.model.MessageModel;
 import com.tronography.locationchat.model.UserModel;
@@ -34,72 +37,88 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.tronography.locationchat.firebase.FirebaseMessageUtils.RetrieveMessageLogListener;
-import static com.tronography.locationchat.userprofile.UserProfileActivity.SENDER_ID_KEY;
 import static com.tronography.locationchat.utils.EditTextUtils.clearText;
+import static com.tronography.locationchat.utils.ObjectUtils.isEmpty;
 import static com.tronography.locationchat.utils.ObjectUtils.isNull;
-import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_KEY;
 
-public class ChatRoomActivity extends BaseActivity implements ChatContract.View, ChildEventListener,
-        MessageAdapter.Listener, FirebaseUserUtils.RetrieveUserListener, RetrieveMessageLogListener {
+public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
+        MessageAdapter.Listener, RetrieveUserListener, RetrieveMessageLogListener {
 
+    private static final String ROOM_ID_KEY = "room_id";
+    private static final String ROOM_NAME_KEY = "room_name";
     private final String TAG = ChatRoomActivity.class.getSimpleName();
+
     @BindView(R.id.chat_input_et)
     EditText editText;
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
+
     private UserModel user;
-    private FirebaseMessageUtils firebaseMessageUtils = new FirebaseMessageUtils();
+    private MessageDoa messageDao = new MessageDoa();
     private String userID;
     private MessageAdapter adapter;
     private ArrayList<MessageModel> messageLog;
     private ChatContract.UserActionListener presenter;
-    private FirebaseUserUtils firebaseUserUtils = new FirebaseUserUtils();
-    private SharedPrefsUtils sharedPrefsUtils;
-
-    // [START declare_auth]
+    private UserDao userDao = new UserDao();
+    private String roomID;
     private FirebaseAuth mAuth;
     private FirebaseUser firebaseUser;
-    // [END declare_auth]
+    private String roomName;
 
-    public static Intent provideIntent(Context context, String userID) {
+    public static Intent provideIntent(Context context) {
+        return new Intent(context, ChatRoomActivity.class);
+    }
+
+    public static Intent provideIntent(Context context, String roomID, String roomName) {
         Intent intent = new Intent(context, ChatRoomActivity.class);
-        intent.putExtra(SENDER_ID_KEY, userID);
+        intent.putExtra(ROOM_ID_KEY, roomID);
+        intent.putExtra(ROOM_NAME_KEY, roomName);
         return intent;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.chatroom_activity);
         ButterKnife.bind(this);
 
-        // [START initialize_auth]
         mAuth = FirebaseAuth.getInstance();
-        // [END initialize_auth]
+
+        roomID = getIntent().getStringExtra(ROOM_ID_KEY);
+        roomName = getIntent().getStringExtra(ROOM_NAME_KEY);
 
         initializePresenter();
         setupAdapter();
         setupList();
 
-        firebaseMessageUtils.addMessageChildEventListener(this);
-        firebaseUserUtils.addUserEventListener(this);
+        MessageEventListener messageEventListener = new MessageEventListener();
+        messageEventListener.addMessageChildEventListener(presenter, roomID);
+        Log.e(TAG, "onCreate: " + "MessageEventListenerAdded");
+
+        UserEventListener userEventListener = new UserEventListener();
+        userEventListener.addUserChildEventListener(presenter);
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+
+        //todo Make more efficent. Perhaps extract this to another class?
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            myToolbar.setTitleTextColor(getColor(R.color.light_font));
+        }
+
         setSupportActionBar(myToolbar);
 
+        setTitle(" Room : " + roomName);
+
         if (!isNull(userID)) {
-            firebaseUserUtils.queryUserByID(userID, this);
+            userDao.queryUserByID(userID, this);
         }
     }
 
-    // [START on_start_check_user]
     @Override
     public void onStart() {
         super.onStart();
         checkIfUserIsLoggedIn();
     }
-    // [END on_start_check_user]
 
     private void checkIfUserIsLoggedIn() {
         firebaseUser = mAuth.getCurrentUser();
@@ -117,8 +136,8 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
     }
 
     private void loadReturningUser(String userID) {
-        CURRENT_USER_KEY = userID;
-        firebaseUserUtils.queryUserByID(userID, this);
+        SharedPrefsUtils.CURRENT_USER_KEY = userID;
+        userDao.queryUserByID(userID, this);
     }
 
     public void launchLoginActivity() {
@@ -147,7 +166,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
         super.onResume();
         Log.e(TAG, "onResume: " + userID);
         loadReturningUser(userID);
-        firebaseMessageUtils.retrieveMessagesFromFirebase(this);
+        messageDao.getMessageLog(this, roomID);
     }
 
     @Override
@@ -172,7 +191,9 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
 
     @Override
     public void onMessageLogReceived(ArrayList<MessageModel> refreshedMessageLog) {
+        Log.e(TAG, "onMessageLogReceived: " + "RECEIVED");
         messageLog = refreshedMessageLog;
+        System.out.println("refreshedMessageLog = " + refreshedMessageLog);
         refreshMessageRecyclerView(messageLog);
     }
 
@@ -184,14 +205,20 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
     @Override
     public void sendMessage() {
         String message = editText.getText().toString();
-        firebaseMessageUtils.addMessageToFirebaseDb(new MessageModel(message, user.getId(), user.getUsername()));
-        clearText(editText, this);
+        if (!isEmpty(message)) {
+            messageDao.saveMessage(new MessageModel(message, user.getId(),
+                    user.getUsername()), roomID);
+            clearText(editText, this);
+        }
     }
 
     @Override
-    public void fireBaseOnChildAdded(DataSnapshot dataSnapshot, String s) {
+    public void messagesOnChildAdded(DataSnapshot dataSnapshot, String s) {
         Iterable<DataSnapshot> children = dataSnapshot.getChildren();
+        Log.e(TAG, "messagesOnChildAdded: " + dataSnapshot.getKey());
         for (DataSnapshot child : children) {
+            Log.e(TAG, "messagesOnChildAdded: " + child.getKey());
+            Log.e(TAG, "messagesOnChildAdded: " + child.child("message_model").getValue(MessageModel.class));
             MessageModel messageModel = child.getValue(MessageModel.class);
             messageLog.add(messageModel);
             recyclerView.scrollToPosition(messageLog.size() - 1);
@@ -200,8 +227,8 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
     }
 
     @Override
-    public void fireBaseOnChildChanged() {
-        firebaseMessageUtils.retrieveMessagesFromFirebase(this);
+    public void messagesOnChildChanged() {
+        messageDao.getMessageLog(this, roomID);
     }
 
     @Override
@@ -216,25 +243,9 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
     }
 
     @Override
-    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-        presenter.childAdded(dataSnapshot, s);
-    }
-
-    @Override
-    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-        presenter.childChanged(dataSnapshot, s);
-    }
-
-    @Override
-    public void onChildRemoved(DataSnapshot dataSnapshot) {
-    }
-
-    @Override
-    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-    }
-
-    @Override
-    public void onCancelled(DatabaseError databaseError) {
+    public void signOut() {
+        mAuth.signOut();
+        updateUI(null);
     }
 
     @Override
@@ -254,13 +265,6 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
-
         }
-    }
-
-    @Override
-    public void signOut() {
-        mAuth.signOut();
-        updateUI(null);
     }
 }

@@ -9,24 +9,24 @@ public class MessageModel {
     private String message;
     private String timeStamp;
     private String senderId;
-    private String username;
+    private String senderName;
 
     public MessageModel() {
     }
 
-    public MessageModel(String messageId, String message, String timeStamp, String senderId, String username) {
+    public MessageModel(String messageId, String message, String timeStamp, String senderId, String senderName) {
         this.messageId = messageId;
         this.message = message;
         this.timeStamp = timeStamp;
         this.senderId = senderId;
-        this.username = username;
+        this.senderName = senderName;
     }
 
     //this constructor should only be used when retrieving message data from firebase
     // TODO: make private and use another method that utilizes this constructor to prevent id manipulation
-    public MessageModel(String senderId, String username, String message, String timeStamp) {
+    public MessageModel(String senderId, String senderName, String message, String timeStamp) {
         this.senderId = senderId;
-        this.username = username;
+        this.senderName = senderName;
         this.message = message;
         this.timeStamp = timeStamp;
     }
@@ -36,10 +36,10 @@ public class MessageModel {
         this.timeStamp = String.valueOf(dateFormatter(getCurrentTime()));
     }
 
-    public MessageModel(String message, String senderId, String username) {
+    public MessageModel(String message, String senderId, String senderName) {
         this.message = message;
         this.senderId = senderId;
-        this.username = username;
+        this.senderName = senderName;
         this.timeStamp = String.valueOf(dateFormatter(getCurrentTime()));
     }
 
@@ -55,8 +55,8 @@ public class MessageModel {
         return senderId;
     }
 
-    public String getUsername() {
-        return username;
+    public String getSenderName() {
+        return senderName;
     }
 
     public void setMessageId(String messageId){
@@ -72,7 +72,7 @@ public class MessageModel {
                 ", timeStamp='" + timeStamp + '\'' +
                 ", message='" + message + '\'' +
                 ", senderId='" + senderId + '\'' +
-                ", username=" + username +
+                ", senderName=" + senderName +
                 '}';
     }
 
@@ -80,8 +80,8 @@ public class MessageModel {
         return System.currentTimeMillis();
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
     }
 
     public void setMessage(String message) {
