@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -17,63 +16,60 @@ import com.tronography.locationchat.BaseActivity;
 import com.tronography.locationchat.R;
 import com.tronography.locationchat.chatroom.ChatRoomActivity;
 import com.tronography.locationchat.database.UserDao;
-import com.tronography.locationchat.database.firebase.FirebaseChatRoomUtils;
+import com.tronography.locationchat.database.firebase.ChatRoomDoa;
+import com.tronography.locationchat.database.firebase.ChatRoomEventListener;
 import com.tronography.locationchat.listeners.RetrieveChatRoomListener;
-import com.tronography.locationchat.listeners.RetrieveUserListener;
 import com.tronography.locationchat.lobby.ChatRoomAdapter.Listener;
 import com.tronography.locationchat.login.LoginActivity;
 import com.tronography.locationchat.model.ChatRoomModel;
-import com.tronography.locationchat.model.UserModel;
 import com.tronography.locationchat.utils.SharedPrefsUtils;
 
 import java.util.ArrayList;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 import static com.tronography.locationchat.utils.ObjectUtils.isEmpty;
 
 
 public class LobbyActivity extends BaseActivity implements LobbyContract.View, Listener,
-        RetrieveChatRoomListener, RetrieveUserListener {
+        RetrieveChatRoomListener {
 
-    FirebaseChatRoomUtils chatRoomUtils = new FirebaseChatRoomUtils();
+    @BindView(R.id.btn_add_room)
+    Button add_room;
 
-    private Button add_room;
-    private EditText room_name;
+    @BindView(R.id.room_name_edittext)
+    EditText room_name;
+    ChatRoomAdapter adapter;
+    ChatRoomDoa chatRoomDoa;
+    @BindView(R.id.chatroom_rv)
+    RecyclerView chatRoomRV;
 
     private LobbyContract.UserActionListener presenter;
     private ArrayList<ChatRoomModel> chatRoomList;
-    private ChatRoomAdapter adapter;
-    private RecyclerView chatRoomRV;
     private FirebaseAuth mAuth;
-    private FirebaseUser firebaseUser;
-    private String userID;
     private UserDao userDao = new UserDao();
-    private UserModel user;
+
+    public static Intent provideIntent(Context context) {
+        return new Intent(context, LobbyActivity.class);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lobby);
+        ButterKnife.bind(this);
 
-        // [START initialize_auth]
         mAuth = FirebaseAuth.getInstance();
-        // [END initialize_auth]
+        chatRoomDoa = new ChatRoomDoa();
 
         initializePresenter();
-        chatRoomRV = (RecyclerView) findViewById(R.id.chatroom_rv);
         setupAdapter();
         setupList();
 
-        add_room = (Button) findViewById(R.id.btn_add_room);
-        room_name = (EditText) findViewById(R.id.room_name_edittext);
-
-        add_room.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                presenter.addRoomClicked();
-            }
-        });
-
-        chatRoomUtils.addChatRoomEventListener(presenter);
+        ChatRoomEventListener chatRoomEventListener = new ChatRoomEventListener();
+        chatRoomEventListener.addChatRoomEventListener(presenter);
     }
 
     @Override
@@ -83,7 +79,7 @@ public class LobbyActivity extends BaseActivity implements LobbyContract.View, L
     }
 
     private void checkIfUserIsLoggedIn() {
-        firebaseUser = mAuth.getCurrentUser();
+        FirebaseUser firebaseUser = mAuth.getCurrentUser();
         updateUI(firebaseUser);
     }
 
@@ -91,7 +87,7 @@ public class LobbyActivity extends BaseActivity implements LobbyContract.View, L
     public void updateUI(FirebaseUser user) {
         hideProgressDialog();
         if (user != null) {
-            userID = user.getUid();
+            String userID = user.getUid();
             loadReturningUser(userID);
         } else {
             launchLoginActivity();
@@ -101,7 +97,6 @@ public class LobbyActivity extends BaseActivity implements LobbyContract.View, L
     @Override
     public void loadReturningUser(String userID) {
         SharedPrefsUtils.CURRENT_USER_KEY = userID;
-        userDao.queryUserByID(userID, this);
     }
 
     @Override
@@ -133,8 +128,8 @@ public class LobbyActivity extends BaseActivity implements LobbyContract.View, L
         String roomName = room_name.getText().toString();
         if (!isEmpty(roomName)) {
             ChatRoomModel newChatRoom = new ChatRoomModel(roomName);
-            chatRoomUtils.addChatRoomToFirebase(newChatRoom);
-            chatRoomUtils.addNewConversationToMessages(newChatRoom);
+            chatRoomDoa.addChatRoomToFirebase(newChatRoom);
+            chatRoomDoa.addNewConversationToMessages(newChatRoom);
         }
     }
 
@@ -150,7 +145,12 @@ public class LobbyActivity extends BaseActivity implements LobbyContract.View, L
 
     @Override
     public void chatRoomOnChildChanged() {
-        chatRoomUtils.retrieveChatRoomsFromFirebase(this);
+        chatRoomDoa.retrieveChatRoomsFromFirebase(this);
+    }
+
+    @OnClick(R.id.btn_add_room)
+    public void onClick() {
+        presenter.addRoomClicked();
     }
 
     @Override
@@ -184,14 +184,5 @@ public class LobbyActivity extends BaseActivity implements LobbyContract.View, L
     @Override
     public void onChatRoomRetrieved(ChatRoomModel chatRoomModel) {
         //// TODO: 8/23/17 no reason for querying a single chatroom at this time.
-    }
-
-    @Override
-    public void onUserRetrieved(UserModel userModel) {
-        user = userModel;
-    }
-
-    public static Intent provideIntent(Context context) {
-        return new Intent(context, LobbyActivity.class);
     }
 }

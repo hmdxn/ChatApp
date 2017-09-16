@@ -24,6 +24,39 @@ import static com.tronography.locationchat.utils.ObjectUtils.isNull;
 public class MessageDoa implements MessageDoaContract {
 
     @Override
+    public void getMessageLog(final RetrieveMessageLogListener listener, String roomID) {
+        final ArrayList<MessageModel> refreshedMessageLog = new ArrayList<>();
+        getChatRoomMessageRef(roomID).addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Iterable<DataSnapshot> children = dataSnapshot.getChildren();
+                for (DataSnapshot child : children) {
+
+                    MessageModel messageModel = accessMessageModel(dataSnapshot, child);
+
+                    if (!isNull(messageModel)) {
+                        Log.e(TAG, "getMessageLog: " + messageModel.getMessage());
+                        refreshedMessageLog.add(messageModel);
+                    }
+                }
+                listener.onMessageLogReceived(refreshedMessageLog);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+
+        });
+    }
+
+    @Override
+    public void updateSenderName(UserModel userModel) {
+        UpdateMessageSenderName updateMessageSenderName = new UpdateMessageSenderName(userModel);
+        updateMessageSenderName.updateSenderName();
+    }
+
+    @Override
     public void saveMessage(MessageModel messageModel, String roomID) {
         //creates a unique key identifier
         HashMap<String, Object> uniqueMessageIdentifier = new HashMap<>();
@@ -50,39 +83,6 @@ public class MessageDoa implements MessageDoaContract {
         HashMap<String, Object> messageModelMap = new HashMap<>();
         messageModelMap.put("message_model", messageModel);
         return messageModelMap;
-    }
-
-    @Override
-    public void updateSenderName(UserModel userModel) {
-        UpdateMessageSenderName updateMessageSenderName = new UpdateMessageSenderName(userModel);
-        updateMessageSenderName.updateSenderName();
-    }
-
-    @Override
-    public void getMessageLog(final RetrieveMessageLogListener listener, String roomID) {
-        final ArrayList<MessageModel> refreshedMessageLog = new ArrayList<>();
-        getChatRoomMessageRef(roomID).addListenerForSingleValueEvent(new ValueEventListener() {
-
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Iterable<DataSnapshot> children = dataSnapshot.getChildren();
-                for (DataSnapshot child : children) {
-
-                    MessageModel messageModel = accessMessageModel(dataSnapshot, child);
-
-                    if (!isNull(messageModel)) {
-                        Log.e(TAG, "getMessageLog: " + messageModel.getMessage());
-                        refreshedMessageLog.add(messageModel);
-                    }
-                }
-                listener.onMessageLogReceived(refreshedMessageLog);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-
-        });
     }
 
     private MessageModel accessMessageModel(DataSnapshot dataSnapshot, DataSnapshot child) {

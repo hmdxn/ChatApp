@@ -25,6 +25,8 @@ import com.tronography.locationchat.model.UserModel;
 import com.tronography.locationchat.utils.SharedPrefsUtils;
 import com.tronography.locationchat.utils.UsernameGenerator;
 
+import butterknife.BindView;
+
 import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_KEY;
 
 
@@ -34,13 +36,20 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     private static final String TAG = "EmailPassword";
     private RetrieveUserListener retrieveUserListener;
 
-    private TextView mStatusTextView;
-    private TextView mDetailTextView;
-    private EditText mEmailField;
-    private EditText mPasswordField;
+    @BindView(R.id.status)
+    TextView mStatusTextView;
+
+    @BindView(R.id.detail)
+    TextView mDetailTextView;
+
+    @BindView(R.id.field_email)
+    EditText mEmailField;
+
+    @BindView(R.id.field_password)
+    EditText mPasswordField;
 
     private UserDao userDao;
-    private UsernameGenerator usernameGenerator = new UsernameGenerator();
+    private UsernameGenerator usernameGenerator;
     private SharedPrefsUtils sharedPrefs;
 
     private FirebaseAuth mAuth;
@@ -125,6 +134,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                             Log.d(TAG, "createUserWithEmail:success");
                             firebaseUser = mAuth.getCurrentUser();
                             updateUI(firebaseUser);
+                            usernameGenerator = new UsernameGenerator();
                             configureNewUser(usernameGenerator.generateTempUsername(), firebaseUser.getUid());
                         } else {
                             // If sign in fails, display a message to the user.

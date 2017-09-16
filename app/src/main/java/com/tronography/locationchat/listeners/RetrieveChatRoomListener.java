@@ -13,4 +13,5 @@ public interface RetrieveChatRoomListener {
     void onChatRoomListRetrieved(ArrayList<ChatRoomModel> chatRoomList);
 
     void onChatRoomRetrieved(ChatRoomModel chatRoomModel);
+
 }

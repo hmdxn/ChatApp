@@ -54,7 +54,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
     RecyclerView recyclerView;
 
     private UserModel user;
-    private MessageDoa messageDoa = new MessageDoa();
+    private MessageDoa messageDao = new MessageDoa();
     private String userID;
     private MessageAdapter adapter;
     private ArrayList<MessageModel> messageLog;
@@ -166,7 +166,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
         super.onResume();
         Log.e(TAG, "onResume: " + userID);
         loadReturningUser(userID);
-        messageDoa.getMessageLog(this, roomID);
+        messageDao.getMessageLog(this, roomID);
     }
 
     @Override
@@ -206,7 +206,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
     public void sendMessage() {
         String message = editText.getText().toString();
         if (!isEmpty(message)) {
-            messageDoa.saveMessage(new MessageModel(message, user.getId(),
+            messageDao.saveMessage(new MessageModel(message, user.getId(),
                     user.getUsername()), roomID);
             clearText(editText, this);
         }
@@ -228,7 +228,7 @@ public class ChatRoomActivity extends BaseActivity implements ChatContract.View,
 
     @Override
     public void messagesOnChildChanged() {
-        messageDoa.getMessageLog(this, roomID);
+        messageDao.getMessageLog(this, roomID);
     }
 
     @Override

@@ -3,13 +3,12 @@ package com.tronography.locationchat.database.firebase;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.tronography.locationchat.database.ChatRoomDoaContract;
 import com.tronography.locationchat.listeners.RetrieveChatRoomListener;
-import com.tronography.locationchat.lobby.LobbyContract;
 import com.tronography.locationchat.model.ChatRoomModel;
 
 import java.util.ArrayList;
@@ -22,9 +21,10 @@ import static com.tronography.locationchat.database.firebase.FirebaseDatabaseRef
 import static com.tronography.locationchat.utils.ObjectUtils.isNull;
 
 
-public class FirebaseChatRoomUtils {
+public class ChatRoomDoa implements ChatRoomDoaContract {
 
-    
+
+    @Override
     public void queryChatRoomByID(final String chatRoomId, final RetrieveChatRoomListener retrieveChatRoomListener) {
         getRoot().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -47,32 +47,6 @@ public class FirebaseChatRoomUtils {
         });
     }
 
-    public void addChatRoomEventListener(final LobbyContract.UserActionListener presenter) {
-        getChatRoomReference().addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                presenter.childAdded(dataSnapshot, s);
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        });
-    }
-
     @NonNull
     private HashMap<String, Object> setDatabaseChatRoomValues(ChatRoomModel chatRoomObject) {
         HashMap<String, Object> chatRoomModelMap = new HashMap<>();
@@ -87,6 +61,7 @@ public class FirebaseChatRoomUtils {
         return chatRoomModelMap;
     }
 
+    @Override
     public void addChatRoomToFirebase(ChatRoomModel chatRoomModel) {
         //creates a unique key identifier
         HashMap<String, Object> uniqueMemberIdentifier = new HashMap<>();
@@ -104,6 +79,7 @@ public class FirebaseChatRoomUtils {
         chatRoomRoot.updateChildren(chatRoomModelMap);
     }
 
+    @Override
     public void addNewConversationToMessages(ChatRoomModel chatRoomModel) {
         //creates a unique key identifier
         HashMap<String, Object> uniqueMemberIdentifier = new HashMap<>();
@@ -117,6 +93,7 @@ public class FirebaseChatRoomUtils {
 
     }
 
+    @Override
     public void retrieveChatRoomsFromFirebase(final RetrieveChatRoomListener listener) {
         final ArrayList<ChatRoomModel> chatRoomList = new ArrayList<>();
         getChatRoomReference().addListenerForSingleValueEvent(new ValueEventListener() {
