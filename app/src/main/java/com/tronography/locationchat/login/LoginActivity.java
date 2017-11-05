@@ -16,16 +16,18 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.tronography.locationchat.BaseActivity;
+import com.google.firebase.auth.UserProfileChangeRequest;
+import com.tronography.locationchat.ChatApplication;
+import com.tronography.locationchat.common.BaseActivity;
 import com.tronography.locationchat.R;
-import com.tronography.locationchat.database.UserDao;
+import com.tronography.locationchat.firebase.datamanagers.UserDataManager;
 import com.tronography.locationchat.listeners.RetrieveUserListener;
 import com.tronography.locationchat.lobby.LobbyActivity;
-import com.tronography.locationchat.model.UserModel;
+import com.tronography.locationchat.model.User;
 import com.tronography.locationchat.utils.SharedPrefsUtils;
 import com.tronography.locationchat.utils.UsernameGenerator;
 
-import butterknife.BindView;
+import butterknife.Bind;
 
 import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_KEY;
 
@@ -36,21 +38,20 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     private static final String TAG = "EmailPassword";
     private RetrieveUserListener retrieveUserListener;
 
-    @BindView(R.id.status)
+    @Bind(R.id.status)
     TextView mStatusTextView;
 
-    @BindView(R.id.detail)
+    @Bind(R.id.detail)
     TextView mDetailTextView;
 
-    @BindView(R.id.field_email)
+    @Bind(R.id.field_email)
     EditText mEmailField;
 
-    @BindView(R.id.field_password)
+    @Bind(R.id.field_password)
     EditText mPasswordField;
 
-    private UserDao userDao;
+    private UserDataManager userDataManager;
     private UsernameGenerator usernameGenerator;
-    private SharedPrefsUtils sharedPrefs;
 
     private FirebaseAuth mAuth;
     private FirebaseUser firebaseUser;
@@ -60,8 +61,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         retrieveUserListener = this;
-        sharedPrefs = new SharedPrefsUtils(this);
-        userDao = new UserDao();
+        userDataManager = new UserDataManager(this);
 
         mStatusTextView = (TextView) findViewById(R.id.status);
         mDetailTextView = (TextView) findViewById(R.id.detail);
@@ -135,6 +135,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                             firebaseUser = mAuth.getCurrentUser();
                             updateUI(firebaseUser);
                             usernameGenerator = new UsernameGenerator();
+
                             configureNewUser(usernameGenerator.generateTempUsername(), firebaseUser.getUid());
                         } else {
                             // If sign in fails, display a message to the user.
@@ -151,11 +152,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     }
 
     private void configureNewUser(String username, String uid) {
-        UserModel user = new UserModel(username, uid);
+        User user = new User(username, uid);
         CURRENT_USER_KEY = user.getId();
-        sharedPrefs.setHasSenderId(true);
-        sharedPrefs.setSharedPreferencesUserId(user.getId());
-        userDao.saveUser(user);
+        userDataManager.saveUser(user);
     }
 
     private void signIn(String email, String password) {
@@ -175,7 +174,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                             Log.d(TAG, "signInWithEmail:success");
                             firebaseUser = mAuth.getCurrentUser();
                             updateUI(firebaseUser);
-                            userDao.queryUserByID(firebaseUser.getUid(), retrieveUserListener);
+                            userDataManager.queryUserByID(firebaseUser.getUid(), retrieveUserListener);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
@@ -262,9 +261,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     }
 
     @Override
-    public void onUserRetrieved(UserModel userModel) {
-        Toast.makeText(this, userModel.getUsername() + " signed in", Toast.LENGTH_SHORT).show();
-        CURRENT_USER_KEY = userModel.getId();
+    public void onUserRetrieved(User user) {
+        Toast.makeText(this, user.getUsername() + " signed in", Toast.LENGTH_SHORT).show();
+        CURRENT_USER_KEY = user.getId();
     }
 
     @Override

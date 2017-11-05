@@ -21,5 +21,22 @@
         <item name="android:textColorHint">@color/charcoal</item>
         <item name="android:textColor">@color/edit_text_details_drawable</item>
     </style>
+
+    <style name="chat_bubble_text_view">
+
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:autoLink">all</item>
+        <item name="android:gravity">start</item>
+        <item name="android:linksClickable">true</item>
+        <item name="android:paddingStart">10dp</item>
+        <item name="android:paddingEnd">10dp</item>
+        <item name="android:paddingTop">6dp</item>
+        <item name="android:paddingBottom">6dp</item>
+        <item name="android:textColor">@color/light_font</item>
+        <item name="android:textColorLink">#2B98CA</item>
+        <item name="android:textSize">@dimen/default_text_size</item>
+    </style>
     
 </resources>

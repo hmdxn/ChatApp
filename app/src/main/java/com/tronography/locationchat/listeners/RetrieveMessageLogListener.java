@@ -1,6 +1,6 @@
 package com.tronography.locationchat.listeners;
 
-import com.tronography.locationchat.model.MessageModel;
+import com.tronography.locationchat.model.Message;
 
 import java.util.ArrayList;
 
@@ -10,6 +10,6 @@ import java.util.ArrayList;
 
 public interface RetrieveMessageLogListener {
 
-    void onMessageLogReceived(ArrayList<MessageModel> messageLog);
+    void onMessageLogReceived(ArrayList<Message> messageLog);
 
 }

@@ -10,7 +10,7 @@ import android.widget.EditText;
 
 public class EditTextUtils {
 
-    private static void hideSoftKeyboard(Activity activity) {
+    public static void hideSoftKeyboard(Activity activity) {
         InputMethodManager inputMethodManager =
                 (InputMethodManager) activity.getSystemService(
                         Activity.INPUT_METHOD_SERVICE);
@@ -20,7 +20,5 @@ public class EditTextUtils {
 
     public static void clearText(EditText view, Activity activity) {
         view.setText("");
-        view.clearFocus();
-        hideSoftKeyboard(activity);
     }
 }

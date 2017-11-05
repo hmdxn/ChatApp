@@ -2,4 +2,5 @@
 <resources>
     <string name="save">SAVE</string>
     <string name="edit">EDIT</string>
+    <string name="Edit">EDIT</string>
 </resources>

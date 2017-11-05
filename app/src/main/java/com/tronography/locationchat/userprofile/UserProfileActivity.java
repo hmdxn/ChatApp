@@ -3,101 +3,140 @@ package com.tronography.locationchat.userprofile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.tronography.locationchat.BaseActivity;
+import com.tronography.locationchat.ChatApplication;
 import com.tronography.locationchat.R;
-import com.tronography.locationchat.database.MessageDoa;
-import com.tronography.locationchat.database.UserDao;
 import com.tronography.locationchat.listeners.RetrieveUserListener;
-import com.tronography.locationchat.model.UserModel;
-import com.tronography.locationchat.utils.SharedPrefsUtils;
+import com.tronography.locationchat.login.LoginActivity;
+import com.tronography.locationchat.model.User;
 
-import butterknife.BindView;
+import javax.inject.Inject;
+
+import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_KEY;
 
-public class UserProfileActivity extends BaseActivity implements RetrieveUserListener {
+
+public class UserProfileActivity extends AppCompatActivity implements UserProfile.View,
+        RetrieveUserListener {
 
     private static final String TAG = UserProfileActivity.class.getSimpleName();
 
-    @BindView(R.id.header_username_tv)
+    @Bind(R.id.header_username_tv)
     TextView headerUsernameTV;
-    @BindView(R.id.edit_option)
+    @Bind(R.id.edit_option)
     TextView editOptionTV;
-    @BindView(R.id.details_bio_et)
+    @Bind(R.id.details_bio_et)
     EditText bioDetailsET;
-    @BindView(R.id.details_location_et)
+    @Bind(R.id.details_location_et)
     EditText locationDetailsET;
-    private UserModel userModel;
-    private UserDao userDao;
-    MessageDoa messageDoa;
-
+    private User user;
     public final static String SENDER_ID_KEY = "sender_id";
-    private SharedPrefsUtils sharedPrefs;
+
+    @Inject
+    public UserProfilePresenter presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile);
         ButterKnife.bind(this);
+        ((ChatApplication) getApplicationContext()).getAppComponent().inject(this);
+        presenter.setView(this);
+        presenter.setUserId(getIntent().getStringExtra(SENDER_ID_KEY));
+        presenter.queryUserById();
+    }
 
-        sharedPrefs = new SharedPrefsUtils(this);
-        userDao = new UserDao();
-        messageDoa = new MessageDoa();
-
-        String userId = getIntent().getStringExtra(SENDER_ID_KEY);
-        userDao.queryUserByID(userId, this);
+    @Override
+    protected void onStart() {
+        super.onStart();
+        presenter.verifyUserAuth();
     }
 
     @OnClick(R.id.edit_option)
     public void onClick() {
-
-        if (editOptionTV.getText().equals("EDIT")){
-            editOptionTV.setText(R.string.save);
+        if (isEditDisabled()) {
+            showSaveButton();
             enableDetailsEditText();
-        } else if (editOptionTV.getText().equals("SAVE")){
-            editOptionTV.setText(R.string.edit);
+        } else if (isEditEnabled()) {
+            showEditButton();
             disableDetailsEditText();
-            saveChanges();
+            presenter.saveChanges(
+                    headerUsernameTV.getText().toString(),
+                    bioDetailsET.getText().toString());
         }
     }
 
-    private void saveChanges() {
-        messageDoa.updateSenderName(userModel);
-        userDao.updateUsername(userModel, headerUsernameTV.getText().toString());
-        userDao.updateBio(userModel, bioDetailsET.getText().toString());
+    private void showEditButton() {
+        editOptionTV.setText(R.string.edit);
     }
 
-    private void enableDetailsEditText() {
+    private void showSaveButton() {
+        editOptionTV.setText(R.string.save);
+    }
+
+    private boolean isEditEnabled() {
+        return editOptionTV.getText().equals(getString(R.string.save));
+    }
+
+    private boolean isEditDisabled() {
+        return editOptionTV.getText().equals(getString(R.string.edit));
+    }
+
+
+    @Override
+    public void enableDetailsEditText() {
         bioDetailsET.setEnabled(true);
         locationDetailsET.setEnabled(true);
         headerUsernameTV.setEnabled(true);
     }
 
-    private void disableDetailsEditText(){
+    @Override
+    public void disableDetailsEditText() {
         bioDetailsET.setEnabled(false);
         locationDetailsET.setEnabled(false);
         headerUsernameTV.setEnabled(false);
     }
 
     @Override
-    public void onUserRetrieved(UserModel queriedUser) {
-        this.userModel = queriedUser;
-        headerUsernameTV.setText(userModel.getUsername());
-        bioDetailsET.setText(userModel.getBio());
-        if (CURRENT_USER_KEY.equals(userModel.getId())){
-            editOptionTV.setVisibility(View.VISIBLE);
+    public void onUserRetrieved(User queriedUser) {
+        this.user = queriedUser;
+        if (CURRENT_USER_KEY.equals(user.getId())) {
+            showEditOption();
         }
+    }
+
+    @Override
+    public void setBioText(String bio) {
+        bioDetailsET.setText(bio);
+    }
+
+    @Override
+    public void setUsernameText(String username) {
+        headerUsernameTV.setText(username);
+    }
+
+    @Override
+    public void showEditOption() {
+        editOptionTV.setVisibility(View.VISIBLE);
     }
 
     public static Intent provideIntent(Context context, String userName) {
         Intent intent = new Intent(context, UserProfileActivity.class);
         intent.putExtra(SENDER_ID_KEY, userName);
         return intent;
+    }
+
+    @Override
+    public void launchLoginActivity() {
+        Intent intent = LoginActivity.provideIntent(this);
+        startActivity(intent);
+        finish();
     }
 }

@@ -3,7 +3,7 @@ package com.tronography.locationchat.lobby;
 import android.support.annotation.NonNull;
 
 import com.google.firebase.database.DataSnapshot;
-import com.tronography.locationchat.model.ChatRoomModel;
+import com.tronography.locationchat.model.ChatRoom;
 
 import static com.tronography.locationchat.utils.ObjectUtils.isNull;
 
@@ -32,7 +32,7 @@ public class LobbyPresenter implements LobbyContract.UserActionListener {
     }
 
     @Override
-    public void chatRoomClicked(ChatRoomModel chatRoom) {
+    public void chatRoomClicked(ChatRoom chatRoom) {
         if ((!isNull(chatRoom))) {
             view.launchChatRoomActivity(chatRoom.getId(), chatRoom.getName());
         }

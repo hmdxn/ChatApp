@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusableInTouchMode="true"
+    tools:context="com.tronography.locationchat.chatroom.ChatActivity">
+    
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_chatroom"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        tools:layout_editor_absoluteX="0dp" />
+
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/chat_input_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/charcoal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:animateLayoutChanges="true"
+        tools:layout_editor_absoluteX="8dp">
+
+    <EditText
+        android:id="@+id/chat_input_et"
+        android:minHeight="45dp"
+        android:maxHeight="150dp"
+        android:layout_width="0dp"
+        android:paddingStart="22dp"
+        android:paddingEnd="22dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:layout_height="wrap_content"
+        tools:layout_editor_absoluteX="0dp"
+        android:inputType="textCapSentences|textMultiLine"
+        android:background="@drawable/rectangle_text_field_background"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/send_button_iv"
+        app:layout_constraintStart_toStartOf="parent"
+        android:focusedByDefault="false"
+        />
+
+    <ImageView
+        android:id="@+id/send_button_iv"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_send_black_24dp"
+        android:tint="@color/cardview_light_background"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        tools:layout_editor_absoluteX="354dp"
+        app:layout_constraintBottom_toBottomOf="@+id/chat_input_et"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+    </android.support.constraint.ConstraintLayout>
+
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scrollbars="vertical"
+        app:stackFromEnd="true"
+        app:layout_constraintBottom_toTopOf="@+id/chat_input_container"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_chatroom"
+        app:layout_constraintVertical_bias="1.0"
+        tools:layout_editor_absoluteX="0dp">
+    </android.support.v7.widget.RecyclerView>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone"
+        tools:layout_editor_absoluteX="192dp" />
+
+</android.support.constraint.ConstraintLayout>

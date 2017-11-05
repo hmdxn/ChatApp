@@ -1,6 +1,6 @@
 package com.tronography.locationchat.listeners;
 
-import com.tronography.locationchat.model.UserModel;
+import com.tronography.locationchat.model.User;
 
 /**
  * Created by jonathancolon on 8/26/17.
@@ -8,6 +8,6 @@ import com.tronography.locationchat.model.UserModel;
 
 public interface RetrieveUserListener {
 
-    void onUserRetrieved(UserModel userModel);
+    void onUserRetrieved(User user);
 
 }

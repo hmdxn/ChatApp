@@ -2,7 +2,7 @@ package com.tronography.locationchat.lobby;
 
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
-import com.tronography.locationchat.model.ChatRoomModel;
+import com.tronography.locationchat.model.ChatRoom;
 
 import java.util.ArrayList;
 
@@ -29,7 +29,7 @@ public class LobbyContract {
 
         void launchChatRoomActivity(String roomID, String roomName);
 
-        void refreshChatRoomRecyclerView(ArrayList<ChatRoomModel> chatRoomList);
+        void refreshChatRoomRecyclerView(ArrayList<ChatRoom> chatRoomList);
     }
 
     public interface UserActionListener {
@@ -40,7 +40,10 @@ public class LobbyContract {
 
         void childChanged(DataSnapshot dataSnapshot, String s);
 
-        void chatRoomClicked(ChatRoomModel chatRoom);
+        void chatRoomClicked(ChatRoom chatRoom);
+    }
 
+    public interface LobbyPresenter {
+        void onAttach(View view);
     }
 }
