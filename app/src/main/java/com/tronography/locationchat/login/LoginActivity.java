@@ -16,20 +16,18 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
-import com.tronography.locationchat.ChatApplication;
 import com.tronography.locationchat.common.BaseActivity;
 import com.tronography.locationchat.R;
 import com.tronography.locationchat.firebase.datamanagers.UserDataManager;
 import com.tronography.locationchat.listeners.RetrieveUserListener;
 import com.tronography.locationchat.lobby.LobbyActivity;
 import com.tronography.locationchat.model.User;
-import com.tronography.locationchat.utils.SharedPrefsUtils;
 import com.tronography.locationchat.utils.UsernameGenerator;
 
 import butterknife.Bind;
+import butterknife.ButterKnife;
 
-import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_KEY;
+import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_ID;
 
 
 public class LoginActivity extends BaseActivity implements View.OnClickListener,
@@ -60,13 +58,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        ButterKnife.bind(this);
+
         retrieveUserListener = this;
         userDataManager = new UserDataManager(this);
-
-        mStatusTextView = (TextView) findViewById(R.id.status);
-        mDetailTextView = (TextView) findViewById(R.id.detail);
-        mEmailField = (EditText) findViewById(R.id.field_email);
-        mPasswordField = (EditText) findViewById(R.id.field_password);
 
         findViewById(R.id.email_sign_in_button).setOnClickListener(this);
         findViewById(R.id.email_create_account_button).setOnClickListener(this);
@@ -153,7 +148,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
     private void configureNewUser(String username, String uid) {
         User user = new User(username, uid);
-        CURRENT_USER_KEY = user.getId();
+        CURRENT_USER_ID = user.getId();
         userDataManager.saveUser(user);
     }
 
@@ -263,7 +258,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     @Override
     public void onUserRetrieved(User user) {
         Toast.makeText(this, user.getUsername() + " signed in", Toast.LENGTH_SHORT).show();
-        CURRENT_USER_KEY = user.getId();
+        CURRENT_USER_ID = user.getId();
     }
 
     @Override

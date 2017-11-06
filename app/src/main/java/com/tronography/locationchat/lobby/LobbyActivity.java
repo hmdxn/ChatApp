@@ -3,16 +3,16 @@ package com.tronography.locationchat.lobby;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.widget.Button;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
-import com.tronography.locationchat.ChatApplication;
 import com.tronography.locationchat.common.BaseActivity;
 import com.tronography.locationchat.R;
 import com.tronography.locationchat.chatroom.ChatActivity;
@@ -22,7 +22,6 @@ import com.tronography.locationchat.listeners.RetrieveChatRoomListener;
 import com.tronography.locationchat.lobby.LobbyAdapter.Listener;
 import com.tronography.locationchat.login.LoginActivity;
 import com.tronography.locationchat.model.ChatRoom;
-import com.tronography.locationchat.utils.SharedPrefsUtils;
 
 import java.util.ArrayList;
 
@@ -31,17 +30,18 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static com.tronography.locationchat.utils.ObjectUtils.isEmpty;
-import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_KEY;
+import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_ID;
 
 
 public class LobbyActivity extends BaseActivity implements LobbyContract.View, Listener,
         RetrieveChatRoomListener {
 
+    private static final String TAG = LobbyActivity.class.getSimpleName();
     @Bind(R.id.chatroom_rv)
     RecyclerView chatroomRV;
 
     @Bind(R.id.btn_add_room)
-    Button add_room;
+    FloatingActionButton add_room;
 
     @Bind(R.id.room_name_edittext)
     EditText room_name;
@@ -93,6 +93,7 @@ public class LobbyActivity extends BaseActivity implements LobbyContract.View, L
         if (user != null) {
             String userID = user.getUid();
             loadReturningUser(userID);
+            Log.i(TAG, "checkIfUserIsLoggedIn: " + user.toString());
         } else {
             launchLoginActivity();
         }
@@ -100,7 +101,7 @@ public class LobbyActivity extends BaseActivity implements LobbyContract.View, L
 
     @Override
     public void loadReturningUser(String userID) {
-        CURRENT_USER_KEY = userID;
+        CURRENT_USER_ID = userID;
     }
 
     @Override

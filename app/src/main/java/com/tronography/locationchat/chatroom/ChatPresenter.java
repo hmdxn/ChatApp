@@ -97,7 +97,7 @@ public class ChatPresenter implements RetrieveMessageLogListener,
         if (user != null) {
             mUserId = user.getUid();
             loadReturningUser(user.getUid());
-            view.showMessage(user.getDisplayName());
+            view.showMessage(user.toString());
         } else {
             view.launchLoginActivity();
         }

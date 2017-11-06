@@ -11,7 +11,7 @@ import com.tronography.locationchat.model.User;
  */
 
 public class SharedPrefsUtils {
-    public static String CURRENT_USER_KEY;
+    public static String CURRENT_USER_ID;
     private SharedPreferences prefs;
 
     public SharedPrefsUtils(Context context) {

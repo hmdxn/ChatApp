@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import com.tronography.locationchat.R;
 import com.tronography.locationchat.model.Message;
-import com.tronography.locationchat.utils.SharedPrefsUtils;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -78,7 +77,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     @Override
     public int getItemViewType(int position) {
         String messageId = messageLog.get(position).getSenderId();
-        if (Objects.equals(messageId, CURRENT_USER_KEY)) {
+        if (Objects.equals(messageId, CURRENT_USER_ID)) {
             return VIEW_TYPE_MESSAGE_SENT;
         } else {
             return VIEW_TYPE_MESSAGE_RECEIVED;
