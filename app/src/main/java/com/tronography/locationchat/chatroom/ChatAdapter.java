@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import com.tronography.locationchat.R;
 import com.tronography.locationchat.model.Message;
-import com.tronography.locationchat.utils.SharedPrefsUtils;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -18,7 +17,6 @@ import java.util.Objects;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-import static com.google.android.gms.internal.zzs.TAG;
 import static com.tronography.locationchat.utils.SharedPrefsUtils.*;
 
 public class ChatAdapter extends RecyclerView.Adapter {
@@ -78,7 +76,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     @Override
     public int getItemViewType(int position) {
         String messageId = messageLog.get(position).getSenderId();
-        if (Objects.equals(messageId, CURRENT_USER_KEY)) {
+        if (Objects.equals(messageId, CURRENT_USER_ID)) {
             return VIEW_TYPE_MESSAGE_SENT;
         } else {
             return VIEW_TYPE_MESSAGE_RECEIVED;
@@ -98,6 +96,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
 
     class MessageReceivedViewHolder extends RecyclerView.ViewHolder {
+        private final String TAG = MessageReceivedViewHolder.class.getSimpleName();
         @Bind(R.id.timestamp_tv)
         TextView timestampTV;
         @Bind(R.id.message_tv)
@@ -142,6 +141,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     class MessageSentViewHolder extends RecyclerView.ViewHolder {
+        private final String TAG = MessageSentViewHolder.class.getSimpleName();
         @Bind(R.id.timestamp_tv)
         TextView timestampTV;
         @Bind(R.id.message_tv)

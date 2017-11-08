@@ -1,4 +1,4 @@
-package com.tronography.locationchat.firebase.datamanagers;
+package com.tronography.locationchat.firebase;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;

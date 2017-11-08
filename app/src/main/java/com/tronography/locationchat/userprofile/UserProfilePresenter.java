@@ -3,8 +3,8 @@ package com.tronography.locationchat.userprofile;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
-import com.tronography.locationchat.firebase.datamanagers.MessageDataManager;
-import com.tronography.locationchat.firebase.datamanagers.UserDataManager;
+import com.tronography.locationchat.firebase.MessageDataManager;
+import com.tronography.locationchat.firebase.UserDataManager;
 import com.tronography.locationchat.listeners.RetrieveMessageLogListener;
 import com.tronography.locationchat.listeners.RetrieveUserListener;
 import com.tronography.locationchat.model.Message;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_KEY;
+import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_ID;
 
 
 public class UserProfilePresenter implements RetrieveMessageLogListener,
@@ -23,6 +23,7 @@ public class UserProfilePresenter implements RetrieveMessageLogListener,
     private UserProfile.View view;
     private User mUser;
     private String mUserId;
+    private String mSenderId;
     private MessageDataManager mMessageDataManager = new MessageDataManager(this);
     private UserDataManager mUserDataManager = new UserDataManager(this);
     private FirebaseAuth mAuth;
@@ -39,7 +40,9 @@ public class UserProfilePresenter implements RetrieveMessageLogListener,
 
     void saveChanges(String username, String bio) {
         mMessageDataManager.updateSenderName(mUser);
-        firebaseUser.updateProfile(new UserProfileChangeRequest.Builder().setDisplayName(username).build());
+        firebaseUser.updateProfile(new UserProfileChangeRequest.Builder()
+                .setDisplayName(username)
+                .build());
         mUserDataManager.updateUsername(mUser,username);
         mUserDataManager.updateBio(mUser, bio);
     }
@@ -50,7 +53,6 @@ public class UserProfilePresenter implements RetrieveMessageLogListener,
 
         if (firebaseUser != null) {
             mUserId = firebaseUser.getUid();
-            loadReturningUser(firebaseUser.getUid());
         } else {
             view.launchLoginActivity();
         }
@@ -59,15 +61,12 @@ public class UserProfilePresenter implements RetrieveMessageLogListener,
     @Override
     public void onUserRetrieved(User user) {
         mUser = user;
+        System.out.println("mUser = " + mUser.toString());
         view.setUsernameText(mUser.getUsername());
         view.setBioText(mUser.getBio());
-        if (CURRENT_USER_KEY.equals(mUser.getId())) {
+        if (mSenderId.equals(CURRENT_USER_ID)){
             view.showEditOption();
         }
-    }
-
-    private void loadReturningUser(String userId) {
-        mUserDataManager.queryUserByID(mUserId, this);
     }
 
     @Override
@@ -75,11 +74,8 @@ public class UserProfilePresenter implements RetrieveMessageLogListener,
 
     }
 
-    public void queryUserById() {
-        mUserDataManager.queryUserByID(mUserId, this);
-    }
-
-    public void setUserId(String userId) {
-        mUserId = userId;
+    public void queryUserById(String senderId) {
+        mSenderId = senderId;
+        mUserDataManager.queryUserByID(mSenderId, this);
     }
 }

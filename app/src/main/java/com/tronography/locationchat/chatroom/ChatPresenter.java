@@ -5,8 +5,8 @@ import android.util.Log;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
-import com.tronography.locationchat.firebase.datamanagers.MessageDataManager;
-import com.tronography.locationchat.firebase.datamanagers.UserDataManager;
+import com.tronography.locationchat.firebase.MessageDataManager;
+import com.tronography.locationchat.firebase.UserDataManager;
 import com.tronography.locationchat.listeners.RetrieveMessageLogListener;
 import com.tronography.locationchat.listeners.RetrieveUserListener;
 import com.tronography.locationchat.model.Message;
@@ -97,7 +97,7 @@ public class ChatPresenter implements RetrieveMessageLogListener,
         if (user != null) {
             mUserId = user.getUid();
             loadReturningUser(user.getUid());
-            view.showMessage(user.getDisplayName());
+            view.showMessage(user.toString());
         } else {
             view.launchLoginActivity();
         }

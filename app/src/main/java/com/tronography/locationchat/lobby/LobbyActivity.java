@@ -2,57 +2,50 @@ package com.tronography.locationchat.lobby;
 
 import android.content.Context;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
+import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
 import com.tronography.locationchat.ChatApplication;
-import com.tronography.locationchat.common.BaseActivity;
+import com.tronography.locationchat.LocationCheck;
 import com.tronography.locationchat.R;
 import com.tronography.locationchat.chatroom.ChatActivity;
-import com.tronography.locationchat.firebase.datamanagers.ChatRoomDataManager;
 import com.tronography.locationchat.firebase.eventlisteners.ChatroomEventListener;
-import com.tronography.locationchat.listeners.RetrieveChatRoomListener;
-import com.tronography.locationchat.lobby.LobbyAdapter.Listener;
 import com.tronography.locationchat.login.LoginActivity;
-import com.tronography.locationchat.model.ChatRoom;
-import com.tronography.locationchat.utils.SharedPrefsUtils;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.util.List;
+
+import javax.inject.Inject;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.tronography.locationchat.utils.ObjectUtils.isEmpty;
-import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_KEY;
+import static com.tronography.locationchat.LocationCheck.LocationCallback;
 
 
-public class LobbyActivity extends BaseActivity implements LobbyContract.View, Listener,
-        RetrieveChatRoomListener {
+public class LobbyActivity extends AppCompatActivity implements Lobby.View,
+        LocationCallback {
 
-    @Bind(R.id.chatroom_rv)
-    RecyclerView chatroomRV;
+    private static final String TAG = LobbyActivity.class.getSimpleName();
 
-    @Bind(R.id.btn_add_room)
-    Button add_room;
-
-    @Bind(R.id.room_name_edittext)
-    EditText room_name;
-
-    LobbyAdapter adapter;
-    ChatRoomDataManager chatRoomDataManager;
-
-    private LobbyContract.UserActionListener presenter;
-    private ArrayList<ChatRoom> chatrooms;
-    private FirebaseAuth mAuth;
-
+    @Bind(R.id.chatroom_card)
+    CardView chatroomCard;
+    @Bind(R.id.chatroom_tv)
+    TextView chatroomTv;
+    @Bind(R.id.progress_bar)
+    ProgressBar progressBar;
+    @Inject
+    LobbyPresenter presenter;
+    private LocationCheck mLocationCheck;
 
     public static Intent provideIntent(Context context) {
         return new Intent(context, LobbyActivity.class);
@@ -63,44 +56,29 @@ public class LobbyActivity extends BaseActivity implements LobbyContract.View, L
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lobby);
         ButterKnife.bind(this);
+        ((ChatApplication) getApplicationContext()).getAppComponent().inject(this);
 
-        mAuth = FirebaseAuth.getInstance();
-        chatRoomDataManager = new ChatRoomDataManager(this);
+        presenter.setView(this);
+        presenter.verifyUserAuth();
+        attachFirebaseEventListener();
+        mLocationCheck = new LocationCheck(this, this);
+    }
 
-        initializePresenter();
-        setupAdapter();
-        setupList();
-
+    private void attachFirebaseEventListener() {
         ChatroomEventListener chatroomEventListener = new ChatroomEventListener();
         chatroomEventListener.addChatroomEventListener(presenter);
-
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        checkIfUserIsLoggedIn();
-    }
-
-    private void checkIfUserIsLoggedIn() {
-        FirebaseUser firebaseUser = mAuth.getCurrentUser();
-        updateUI(firebaseUser);
+    protected void onResume() {
+        super.onResume();
+        mLocationCheck.connect();
     }
 
     @Override
-    public void updateUI(FirebaseUser user) {
-        hideProgressDialog();
-        if (user != null) {
-            String userID = user.getUid();
-            loadReturningUser(userID);
-        } else {
-            launchLoginActivity();
-        }
-    }
-
-    @Override
-    public void loadReturningUser(String userID) {
-        CURRENT_USER_KEY = userID;
+    protected void onPause() {
+        super.onPause();
+        mLocationCheck.disconnect();
     }
 
     @Override
@@ -110,82 +88,41 @@ public class LobbyActivity extends BaseActivity implements LobbyContract.View, L
         finish();
     }
 
-    private void initializePresenter() {
-        if (presenter == null) presenter = new LobbyPresenter(this);
+    @OnClick(R.id.chatroom_card)
+    public void onChatroomClicked(){
+        presenter.chatRoomClicked(chatroomTv.getText().toString());
     }
 
     @Override
-    public void setupAdapter() {
-        chatrooms = new ArrayList<>();
-        adapter = new LobbyAdapter(this);
-        adapter.setData(chatrooms);
-    }
-
-    @Override
-    public void setupList() {
-        chatroomRV.setLayoutManager(new LinearLayoutManager(chatroomRV.getContext()));
-        chatroomRV.setAdapter(adapter);
-    }
-
-    @Override
-    public void addRoom() {
-        String roomName = room_name.getText().toString();
-        if (!isEmpty(roomName)) {
-            ChatRoom newChatroom = new ChatRoom(roomName);
-            chatRoomDataManager.addChatroomToFirebase(newChatroom);
-        }
-    }
-
-    @Override
-    public void chatRoomOnChildAdded(DataSnapshot dataSnapshot, String s) {
-        Iterable<DataSnapshot> children = dataSnapshot.getChildren();
-        for (DataSnapshot child : children) {
-            ChatRoom chatRoom = child.getValue(ChatRoom.class);
-            chatrooms.add(chatRoom);
-            adapter.notifyDataSetChanged();
-        }
-    }
-
-    @Override
-    public void chatRoomOnChildChanged() {
-        chatRoomDataManager.retrieveFromFirebase();
-    }
-
-    @OnClick(R.id.btn_add_room)
-    public void onClick() {
-        presenter.addRoomClicked();
-    }
-
-    @Override
-    public void onMessageLongClicked(ChatRoom chatRoom) {
-        Toast.makeText(this, chatRoom.getId(), Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onChatRoomClicked(ChatRoom chatRoom) {
-        launchChatRoomActivity(chatRoom.getId(), chatRoom.getName());
-    }
-
-    @Override
-    public void launchChatRoomActivity(String roomID, String roomName) {
-        Intent intent = ChatActivity.provideIntent(this, roomID, roomName);
+    public void launchChatroomActivity(String roomName) {
+        Intent intent = ChatActivity.provideIntent(this, roomName);
         startActivity(intent);
     }
 
     @Override
-    public void onChatRoomListRetrieved(ArrayList<ChatRoom> refreshedChatRoomList) {
-        chatrooms = refreshedChatRoomList;
-        refreshChatRoomRecyclerView(chatrooms);
+    public void showChatroom(String chatroomName) {
+        progressBar.setVisibility(View.GONE);
+        chatroomCard.setVisibility(View.VISIBLE);
+        chatroomTv.setText(chatroomName);
     }
 
     @Override
-    public void refreshChatRoomRecyclerView(ArrayList<ChatRoom> chatRoomList) {
-        LobbyAdapter adapter = (LobbyAdapter) chatroomRV.getAdapter();
-        adapter.setData(chatRoomList);
-    }
+    public void handleNewLocation(Location location) {
+        Log.e(TAG, "handleNewLocation: CALLED");
+        Log.e(TAG, location.toString());
+        double currentLatitude = location.getLatitude();
+        double currentLongitude = location.getLongitude();
 
-    @Override
-    public void onChatRoomRetrieved(ChatRoom chatRoom) {
-        //// TODO: 8/23/17 no reason for querying a single chatroom at this time.
+        Geocoder geocoder = new Geocoder(this);
+
+        try {
+            List<Address> fromLocation = geocoder.getFromLocation(currentLatitude, currentLongitude, 1);
+            Log.e(TAG, "handleNewLocation: " + fromLocation.get(0).toString());
+            String postalCode = fromLocation.get(0).getPostalCode();
+            presenter.retrieveChatroom(postalCode);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e(TAG, "handleNewLocation: " + e);
+        }
     }
 }

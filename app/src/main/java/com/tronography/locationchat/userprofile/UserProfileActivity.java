@@ -20,7 +20,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_KEY;
+import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_ID;
 
 
 public class UserProfileActivity extends AppCompatActivity implements UserProfile.View,
@@ -48,15 +48,10 @@ public class UserProfileActivity extends AppCompatActivity implements UserProfil
         setContentView(R.layout.activity_user_profile);
         ButterKnife.bind(this);
         ((ChatApplication) getApplicationContext()).getAppComponent().inject(this);
-        presenter.setView(this);
-        presenter.setUserId(getIntent().getStringExtra(SENDER_ID_KEY));
-        presenter.queryUserById();
-    }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
+        presenter.setView(this);
         presenter.verifyUserAuth();
+        presenter.queryUserById(getIntent().getStringExtra(SENDER_ID_KEY));
     }
 
     @OnClick(R.id.edit_option)
@@ -107,7 +102,7 @@ public class UserProfileActivity extends AppCompatActivity implements UserProfil
     @Override
     public void onUserRetrieved(User queriedUser) {
         this.user = queriedUser;
-        if (CURRENT_USER_KEY.equals(user.getId())) {
+        if (CURRENT_USER_ID.equals(user.getId())) {
             showEditOption();
         }
     }

@@ -1,6 +1,6 @@
 package com.tronography.locationchat.listeners;
 
-import com.tronography.locationchat.model.ChatRoom;
+import com.tronography.locationchat.model.Chatroom;
 
 import java.util.ArrayList;
 
@@ -10,8 +10,5 @@ import java.util.ArrayList;
 
 public interface RetrieveChatRoomListener {
 
-    void onChatRoomListRetrieved(ArrayList<ChatRoom> chatRoomList);
-
-    void onChatRoomRetrieved(ChatRoom chatRoom);
-
+    void onChatRoomRetrieved(Chatroom chatroom);
 }
