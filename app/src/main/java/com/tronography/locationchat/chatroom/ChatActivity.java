@@ -56,14 +56,11 @@ public class ChatActivity extends AppCompatActivity implements Chat.View,
 
     @Inject
     ChatPresenter presenter;
-
-    private String roomId;
     private String roomName;
 
 
-    public static Intent provideIntent(Context context, String roomID, String roomName) {
+    public static Intent provideIntent(Context context, String roomName) {
         Intent intent = new Intent(context, ChatActivity.class);
-        intent.putExtra(ROOM_ID_KEY, roomID);
         intent.putExtra(ROOM_NAME_KEY, roomName);
         return intent;
     }
@@ -75,11 +72,10 @@ public class ChatActivity extends AppCompatActivity implements Chat.View,
         ((ChatApplication) getApplicationContext()).getAppComponent().inject(this);
         ButterKnife.bind(this);
 
-        roomId = getIntent().getStringExtra(ROOM_ID_KEY);
         roomName = getIntent().getStringExtra(ROOM_NAME_KEY);
 
         presenter.setView(this);
-        presenter.setRoomId(roomId);
+        presenter.setRoomId(roomName);
         presenter.verifyUserAuth();
         presenter.updateUi();
     }
@@ -96,7 +92,7 @@ public class ChatActivity extends AppCompatActivity implements Chat.View,
     @Override
     public void attachFirebaseEventListeners() {
         MessageEventListener messageEventListener = new MessageEventListener();
-        messageEventListener.addMessageChildEventListener(presenter, roomId);
+        messageEventListener.addMessageChildEventListener(presenter, roomName);
 
         UserEventListener userEventListener = new UserEventListener();
         userEventListener.addUserChildEventListener(presenter);

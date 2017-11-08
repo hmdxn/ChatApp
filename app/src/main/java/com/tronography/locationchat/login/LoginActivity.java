@@ -1,9 +1,12 @@
 package com.tronography.locationchat.login;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -18,7 +21,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.tronography.locationchat.common.BaseActivity;
 import com.tronography.locationchat.R;
-import com.tronography.locationchat.firebase.datamanagers.UserDataManager;
+import com.tronography.locationchat.firebase.UserDataManager;
 import com.tronography.locationchat.listeners.RetrieveUserListener;
 import com.tronography.locationchat.lobby.LobbyActivity;
 import com.tronography.locationchat.model.User;
@@ -37,21 +40,21 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     private RetrieveUserListener retrieveUserListener;
 
     @Bind(R.id.status)
-    TextView mStatusTextView;
+    TextView authStatusTv;
 
     @Bind(R.id.detail)
-    TextView mDetailTextView;
+    TextView detailTv;
 
-    @Bind(R.id.field_email)
-    EditText mEmailField;
+    @Bind(R.id.email_field)
+    EditText emailField;
 
-    @Bind(R.id.field_password)
-    EditText mPasswordField;
+    @Bind(R.id.password_field)
+    EditText passwordField;
 
     private UserDataManager userDataManager;
     private UsernameGenerator usernameGenerator;
 
-    private FirebaseAuth mAuth;
+    private FirebaseAuth firebaseAuth;
     private FirebaseUser firebaseUser;
 
     @Override
@@ -63,18 +66,32 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         retrieveUserListener = this;
         userDataManager = new UserDataManager(this);
 
+        checkPermissions();
+
         findViewById(R.id.email_sign_in_button).setOnClickListener(this);
         findViewById(R.id.email_create_account_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
         findViewById(R.id.verify_email_button).setOnClickListener(this);
 
-        mAuth = FirebaseAuth.getInstance();
+        firebaseAuth = FirebaseAuth.getInstance();
+    }
+
+    private void checkPermissions() {
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                    1);
+        }
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        firebaseUser = mAuth.getCurrentUser();
+        firebaseUser = firebaseAuth.getCurrentUser();
         updateUI(firebaseUser);
     }
 
@@ -82,9 +99,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         Log.e(TAG, "updateUI: " + "CALLED" );
         hideProgressDialog();
         if (user != null) {
-            mStatusTextView.setText(getString(R.string.emailpassword_status_fmt,
+            authStatusTv.setText(getString(R.string.emailpassword_status_fmt,
                     user.getEmail(), user.isEmailVerified()));
-            mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
+            detailTv.setText(getString(R.string.firebase_status_fmt, user.getUid()));
+
+            CURRENT_USER_ID = firebaseUser.getUid();
 
             findViewById(R.id.email_password_buttons).setVisibility(View.GONE);
             findViewById(R.id.email_password_fields).setVisibility(View.GONE);
@@ -92,8 +111,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             findViewById(R.id.verify_email_button).setEnabled(!user.isEmailVerified());
             launchLobbyActivity(this);
         } else {
-            mStatusTextView.setText(R.string.signed_out);
-            mDetailTextView.setText(null);
+            authStatusTv.setText(R.string.signed_out);
+            detailTv.setText(null);
 
             findViewById(R.id.email_password_buttons).setVisibility(View.VISIBLE);
             findViewById(R.id.email_password_fields).setVisibility(View.VISIBLE);
@@ -120,18 +139,19 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
         showProgressDialog();
 
-        mAuth.createUserWithEmailAndPassword(email, password)
+        firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "createUserWithEmail:success");
-                            firebaseUser = mAuth.getCurrentUser();
+                            firebaseUser = firebaseAuth.getCurrentUser();
                             updateUI(firebaseUser);
                             usernameGenerator = new UsernameGenerator();
 
-                            configureNewUser(usernameGenerator.generateTempUsername(), firebaseUser.getUid());
+                            configureNewUser(usernameGenerator.generateTempUsername(),
+                                    firebaseUser.getUid());
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
@@ -160,14 +180,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
         showProgressDialog();
 
-        mAuth.signInWithEmailAndPassword(email, password)
+        firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithEmail:success");
-                            firebaseUser = mAuth.getCurrentUser();
+                            firebaseUser = firebaseAuth.getCurrentUser();
                             updateUI(firebaseUser);
                             userDataManager.queryUserByID(firebaseUser.getUid(), retrieveUserListener);
                         } else {
@@ -179,7 +199,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                         }
 
                         if (!task.isSuccessful()) {
-                            mStatusTextView.setText(R.string.auth_failed);
+                            authStatusTv.setText(R.string.auth_failed);
                         }
                         hideProgressDialog();
                     }
@@ -187,7 +207,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     }
 
     private void signOut() {
-        mAuth.signOut();
+        firebaseAuth.signOut();
         updateUI(null);
     }
 
@@ -197,7 +217,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
         // Send verification email
         // [START send_email_verification]
-        final FirebaseUser user = mAuth.getCurrentUser();
+        final FirebaseUser user = firebaseAuth.getCurrentUser();
         assert user != null;
         user.sendEmailVerification()
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
@@ -222,20 +242,20 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     private boolean validateForm() {
         boolean valid = true;
 
-        String email = mEmailField.getText().toString();
+        String email = emailField.getText().toString();
         if (TextUtils.isEmpty(email)) {
-            mEmailField.setError("Required.");
+            emailField.setError("Required.");
             valid = false;
         } else {
-            mEmailField.setError(null);
+            emailField.setError(null);
         }
 
-        String password = mPasswordField.getText().toString();
+        String password = passwordField.getText().toString();
         if (TextUtils.isEmpty(password)) {
-            mPasswordField.setError("Required.");
+            passwordField.setError("Required.");
             valid = false;
         } else {
-            mPasswordField.setError(null);
+            passwordField.setError(null);
         }
 
         return valid;
@@ -245,9 +265,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     public void onClick(View v) {
         int i = v.getId();
         if (i == R.id.email_create_account_button) {
-            createAccount(mEmailField.getText().toString(), mPasswordField.getText().toString());
+            createAccount(emailField.getText().toString(), passwordField.getText().toString());
         } else if (i == R.id.email_sign_in_button) {
-            signIn(mEmailField.getText().toString(), mPasswordField.getText().toString());
+            signIn(emailField.getText().toString(), passwordField.getText().toString());
         } else if (i == R.id.sign_out_button) {
             signOut();
         } else if (i == R.id.verify_email_button) {

@@ -4,7 +4,7 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.tronography.locationchat.chatroom.ChatPresenter;
-import com.tronography.locationchat.firebase.datamanagers.FirebaseDatabaseReference;
+import com.tronography.locationchat.firebase.FirebaseDatabaseReference;
 
 /**
  * Created by jonathancolon on 8/27/17.

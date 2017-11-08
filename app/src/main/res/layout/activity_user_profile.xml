@@ -113,7 +113,6 @@
             <EditText
                 android:id="@+id/details_bio_et"
                 style="@style/user_profile_details_et_dimensions"
-                android:text="@string/filler_text"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/title_bio_tv"
@@ -133,7 +132,6 @@
             <EditText
                 android:id="@+id/details_location_et"
                 style="@style/user_profile_details_et_dimensions"
-                android:text="New York, NY"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/title_location_tv"

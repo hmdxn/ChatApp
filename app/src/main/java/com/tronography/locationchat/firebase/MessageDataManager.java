@@ -1,4 +1,4 @@
-package com.tronography.locationchat.firebase.datamanagers;
+package com.tronography.locationchat.firebase;
 
 import android.util.Log;
 
@@ -18,7 +18,7 @@ import static com.tronography.locationchat.utils.Constants.MESSAGE_MODEL;
 import static com.tronography.locationchat.utils.ObjectUtils.isNull;
 
 
-public class MessageDataManager implements MessageDataManagerContract {
+public class MessageDataManager {
 
     private RetrieveMessageLogListener mListener;
 
@@ -27,7 +27,6 @@ public class MessageDataManager implements MessageDataManagerContract {
         mListener = listener;
     }
 
-    @Override
     public void getMessageLog(String roomID) {
         final ArrayList<Message> refreshedMessageLog = new ArrayList<>();
         FirebaseDatabaseReference.getChatRoomMessageRef(roomID).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -58,13 +57,11 @@ public class MessageDataManager implements MessageDataManagerContract {
         });
     }
 
-    @Override
     public void updateSenderName(User user) {
         UpdateMessageSenderName updateMessageSenderName = new UpdateMessageSenderName(user);
         updateMessageSenderName.updateSenderName();
     }
 
-    @Override
     public void saveMessage(Message message, String roomID) {
         //creates a unique key identifier
         HashMap<String, Object> uniqueMessageIdentifier = new HashMap<>();

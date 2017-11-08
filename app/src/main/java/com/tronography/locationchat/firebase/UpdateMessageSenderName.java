@@ -1,4 +1,4 @@
-package com.tronography.locationchat.firebase.datamanagers;
+package com.tronography.locationchat.firebase;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -7,8 +7,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import com.tronography.locationchat.firebase.datamanagers.FirebaseDatabaseReference;
-import com.tronography.locationchat.model.ChatRoom;
+import com.tronography.locationchat.model.Chatroom;
 import com.tronography.locationchat.model.Message;
 import com.tronography.locationchat.model.User;
 
@@ -36,10 +35,10 @@ public class UpdateMessageSenderName {
                 Iterable<DataSnapshot> children = dataSnapshot.getChildren();
                 for (DataSnapshot child : children) {
                     String key = child.getKey();
-                    ChatRoom chatroom = dataSnapshot
+                    Chatroom chatroom = dataSnapshot
                             .child(key)
                             .child(CHATROOM)
-                            .getValue(ChatRoom.class);
+                            .getValue(Chatroom.class);
                     Log.e(TAG, "getMessageLog: " + chatroom.getName());
                     updateMessageSenderName(user, chatroom.getId());
                 }
