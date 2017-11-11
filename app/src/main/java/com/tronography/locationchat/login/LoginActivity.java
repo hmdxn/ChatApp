@@ -27,7 +27,7 @@ import com.tronography.locationchat.lobby.LobbyActivity;
 import com.tronography.locationchat.model.User;
 import com.tronography.locationchat.utils.UsernameGenerator;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_ID;
@@ -39,16 +39,16 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     private static final String TAG = "EmailPassword";
     private RetrieveUserListener retrieveUserListener;
 
-    @Bind(R.id.status)
+    @BindView(R.id.status)
     TextView authStatusTv;
 
-    @Bind(R.id.detail)
+    @BindView(R.id.detail)
     TextView detailTv;
 
-    @Bind(R.id.email_field)
+    @BindView(R.id.email_field)
     EditText emailField;
 
-    @Bind(R.id.password_field)
+    @BindView(R.id.password_field)
     EditText passwordField;
 
     private UserDataManager userDataManager;
