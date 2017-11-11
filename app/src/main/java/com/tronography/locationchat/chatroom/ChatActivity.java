@@ -29,7 +29,7 @@ import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -43,13 +43,13 @@ public class ChatActivity extends AppCompatActivity implements Chat.View,
     private static final String ROOM_NAME_KEY = "room_name";
     private final String TAG = ChatActivity.class.getSimpleName();
 
-    @Bind(R.id.chat_input_et)
+    @BindView(R.id.chat_input_et)
     EditText editText;
-    @Bind(R.id.recycler_view)
+    @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
-    @Bind(R.id.progress_bar)
+    @BindView(R.id.progress_bar)
     ProgressBar progressBar;
-    @Bind(R.id.toolbar_chatroom)
+    @BindView(R.id.toolbar_chatroom)
     Toolbar toolbar;
 
     private ChatAdapter adapter;
@@ -136,7 +136,7 @@ public class ChatActivity extends AppCompatActivity implements Chat.View,
     public void submit() {
         String message = editText.getText().toString();
         if (!isEmpty(message)) {
-            presenter.sendMessage(message);
+            presenter.sendMessage(message.trim());
             adapter.notifyDataSetChanged();
             clearText(editText, this);
         }

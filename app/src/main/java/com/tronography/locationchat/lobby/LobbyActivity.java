@@ -25,7 +25,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -37,11 +37,11 @@ public class LobbyActivity extends AppCompatActivity implements Lobby.View,
 
     private static final String TAG = LobbyActivity.class.getSimpleName();
 
-    @Bind(R.id.chatroom_card)
+    @BindView(R.id.chatroom_card)
     CardView chatroomCard;
-    @Bind(R.id.chatroom_tv)
+    @BindView(R.id.chatroom_tv)
     TextView chatroomTv;
-    @Bind(R.id.progress_bar)
+    @BindView(R.id.progress_bar)
     ProgressBar progressBar;
     @Inject
     LobbyPresenter presenter;

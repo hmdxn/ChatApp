@@ -14,7 +14,7 @@ import com.tronography.locationchat.model.Message;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.tronography.locationchat.utils.SharedPrefsUtils.*;
@@ -97,11 +97,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     class MessageReceivedViewHolder extends RecyclerView.ViewHolder {
         private final String TAG = MessageReceivedViewHolder.class.getSimpleName();
-        @Bind(R.id.timestamp_tv)
+        @BindView(R.id.timestamp_tv)
         TextView timestampTV;
-        @Bind(R.id.message_tv)
+        @BindView(R.id.message_tv)
         TextView messageTV;
-        @Bind(R.id.username_tv)
+        @BindView(R.id.username_tv)
         TextView usernameTV;
 
         MessageReceivedViewHolder(View itemView) {
@@ -142,9 +142,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     class MessageSentViewHolder extends RecyclerView.ViewHolder {
         private final String TAG = MessageSentViewHolder.class.getSimpleName();
-        @Bind(R.id.timestamp_tv)
+        @BindView(R.id.timestamp_tv)
         TextView timestampTV;
-        @Bind(R.id.message_tv)
+        @BindView(R.id.message_tv)
         TextView messageTV;
 
         MessageSentViewHolder(View itemView) {

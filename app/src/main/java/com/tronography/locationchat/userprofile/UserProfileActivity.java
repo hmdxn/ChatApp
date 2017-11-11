@@ -16,7 +16,7 @@ import com.tronography.locationchat.model.User;
 
 import javax.inject.Inject;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -28,13 +28,13 @@ public class UserProfileActivity extends AppCompatActivity implements UserProfil
 
     private static final String TAG = UserProfileActivity.class.getSimpleName();
 
-    @Bind(R.id.header_username_tv)
+    @BindView(R.id.header_username_tv)
     TextView headerUsernameTV;
-    @Bind(R.id.edit_option)
+    @BindView(R.id.edit_option)
     TextView editOptionTV;
-    @Bind(R.id.details_bio_et)
+    @BindView(R.id.details_bio_et)
     EditText bioDetailsET;
-    @Bind(R.id.details_location_et)
+    @BindView(R.id.details_location_et)
     EditText locationDetailsET;
     private User user;
     public final static String SENDER_ID_KEY = "sender_id";
