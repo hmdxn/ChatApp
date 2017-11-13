@@ -19,9 +19,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.tronography.locationchat.common.BaseActivity;
 import com.tronography.locationchat.R;
-import com.tronography.locationchat.firebase.UserDataManager;
+import com.tronography.locationchat.common.BaseActivity;
+import com.tronography.locationchat.firebase.datamangers.UserDataManager;
 import com.tronography.locationchat.listeners.RetrieveUserListener;
 import com.tronography.locationchat.lobby.LobbyActivity;
 import com.tronography.locationchat.model.User;
@@ -60,9 +60,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_login_alternate);
         ButterKnife.bind(this);
-
         retrieveUserListener = this;
         userDataManager = new UserDataManager(this);
 
@@ -70,8 +69,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
         findViewById(R.id.email_sign_in_button).setOnClickListener(this);
         findViewById(R.id.email_create_account_button).setOnClickListener(this);
-        findViewById(R.id.sign_out_button).setOnClickListener(this);
-        findViewById(R.id.verify_email_button).setOnClickListener(this);
 
         firebaseAuth = FirebaseAuth.getInstance();
     }
@@ -96,7 +93,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     }
 
     private void updateUI(FirebaseUser user) {
-        Log.e(TAG, "updateUI: " + "CALLED" );
+        Log.e(TAG, "updateUI: " + "CALLED");
         hideProgressDialog();
         if (user != null) {
             authStatusTv.setText(getString(R.string.emailpassword_status_fmt,
@@ -105,23 +102,15 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
             CURRENT_USER_ID = firebaseUser.getUid();
 
-            findViewById(R.id.email_password_buttons).setVisibility(View.GONE);
-            findViewById(R.id.email_password_fields).setVisibility(View.GONE);
-            findViewById(R.id.signed_in_buttons).setVisibility(View.VISIBLE);
-            findViewById(R.id.verify_email_button).setEnabled(!user.isEmailVerified());
             launchLobbyActivity(this);
         } else {
             authStatusTv.setText(R.string.signed_out);
             detailTv.setText(null);
-
-            findViewById(R.id.email_password_buttons).setVisibility(View.VISIBLE);
-            findViewById(R.id.email_password_fields).setVisibility(View.VISIBLE);
-            findViewById(R.id.signed_in_buttons).setVisibility(View.GONE);
         }
     }
 
     public void launchLobbyActivity(Context context) {
-        Log.e(TAG, "launchLobbyActivity: called");
+        Log.i(TAG, "launchLobbyActivity: called");
         Intent intent = LobbyActivity.provideIntent(context);
         startActivity(intent);
         finish();
@@ -206,39 +195,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                 });
     }
 
-    private void signOut() {
-        firebaseAuth.signOut();
-        updateUI(null);
-    }
-
-    private void sendEmailVerification() {
-        // Disable button
-        findViewById(R.id.verify_email_button).setEnabled(false);
-
-        // Send verification email
-        // [START send_email_verification]
-        final FirebaseUser user = firebaseAuth.getCurrentUser();
-        assert user != null;
-        user.sendEmailVerification()
-                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        findViewById(R.id.verify_email_button).setEnabled(true);
-
-                        if (task.isSuccessful()) {
-                            Toast.makeText(LoginActivity.this,
-                                    "Verification email sent to " + user.getEmail(),
-                                    Toast.LENGTH_SHORT).show();
-                        } else {
-                            Log.e(TAG, "sendEmailVerification", task.getException());
-                            Toast.makeText(LoginActivity.this,
-                                    "Failed to addRoomClicked verification email.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-    }
-
     private boolean validateForm() {
         boolean valid = true;
 
@@ -268,10 +224,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             createAccount(emailField.getText().toString(), passwordField.getText().toString());
         } else if (i == R.id.email_sign_in_button) {
             signIn(emailField.getText().toString(), passwordField.getText().toString());
-        } else if (i == R.id.sign_out_button) {
-            signOut();
-        } else if (i == R.id.verify_email_button) {
-            sendEmailVerification();
         }
     }
 

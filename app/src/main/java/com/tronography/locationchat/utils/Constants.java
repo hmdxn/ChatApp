@@ -13,6 +13,7 @@ public class Constants {
     public static final String CHATROOMS = "chatrooms";
     public static final String CHATROOM = "chatroom";
 
+
     private Constants(){
         //this prevents even the native class from
         //calling this constructor as well :

@@ -5,11 +5,9 @@ import android.util.Log;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
-import com.tronography.locationchat.firebase.ChatRoomDataManager;
+import com.tronography.locationchat.firebase.datamangers.ChatRoomDataManager;
 import com.tronography.locationchat.listeners.RetrieveChatRoomListener;
 import com.tronography.locationchat.model.Chatroom;
-
-import java.util.ArrayList;
 
 import javax.inject.Inject;
 

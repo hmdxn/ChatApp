@@ -1,4 +1,4 @@
-package com.tronography.locationchat.firebase;
+package com.tronography.locationchat.firebase.datamangers;
 
 import android.util.Log;
 
@@ -6,6 +6,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.tronography.locationchat.firebase.utils.FirebaseDatabaseReference;
+import com.tronography.locationchat.firebase.utils.UpdateMessageSenderName;
 import com.tronography.locationchat.listeners.RetrieveMessageLogListener;
 import com.tronography.locationchat.model.Message;
 import com.tronography.locationchat.model.User;
@@ -59,7 +61,7 @@ public class MessageDataManager {
 
     public void updateSenderName(User user) {
         UpdateMessageSenderName updateMessageSenderName = new UpdateMessageSenderName(user);
-        updateMessageSenderName.updateSenderName();
+        updateMessageSenderName.applyChanges();
     }
 
     public void saveMessage(Message message, String roomID) {

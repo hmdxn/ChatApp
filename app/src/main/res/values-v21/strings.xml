@@ -3,4 +3,7 @@
     <string name="save">SAVE</string>
     <string name="edit">EDIT</string>
     <string name="Edit">EDIT</string>
+    <string name="warning_play_services">Google Play Services unavailable</string>
+    <string name="warning_invalid_link">Invalid Link</string>
+    <string name="toast_network_not_available">Network unavailable</string>
 </resources>

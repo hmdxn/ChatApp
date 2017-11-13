@@ -81,7 +81,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/sign_in"
-                android:background="@color/carmine_pink_lite"
+                android:background="@color/colorAccent"
                 android:textColor="@color/light_font"
                 android:theme="@style/ThemeOverlay.MyDarkButton" />
             
@@ -91,7 +91,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/create_account"
-                android:background="@color/carmine_pink_lite"
+                android:background="@color/colorAccent"
                 android:textColor="@color/light_font"
                 android:theme="@style/ThemeOverlay.MyDarkButton" />
         </LinearLayout>
@@ -106,7 +106,7 @@
             android:paddingRight="16dp"
             android:visibility="gone"
             android:weightSum="2.0">
-            
+
             <Button
                 android:id="@+id/sign_out_button"
                 android:layout_width="0dp"
@@ -114,7 +114,7 @@
                 android:layout_weight="1.0"
                 android:text="@string/sign_out"
                 android:theme="@style/ThemeOverlay.MyDarkButton" />
-            
+
             <Button
                 android:id="@+id/verify_email_button"
                 android:layout_width="0dp"
