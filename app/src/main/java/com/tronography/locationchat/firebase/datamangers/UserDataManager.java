@@ -1,4 +1,4 @@
-package com.tronography.locationchat.firebase;
+package com.tronography.locationchat.firebase.datamangers;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -7,6 +7,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.tronography.locationchat.firebase.utils.FirebaseDatabaseReference;
 import com.tronography.locationchat.listeners.RetrieveUserListener;
 import com.tronography.locationchat.model.User;
 

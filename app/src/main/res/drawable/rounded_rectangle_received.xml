@@ -3,7 +3,7 @@
 
     <!-- View background color -->
     <solid
-        android:color="@color/carmine_pink_lite" >
+        android:color="#E97451" >
     </solid>
 
     <!-- The radius makes the corners rounded -->

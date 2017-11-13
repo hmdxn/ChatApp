@@ -2,38 +2,32 @@ package com.tronography.locationchat.lobby;
 
 import android.content.Context;
 import android.content.Intent;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.tronography.locationchat.ChatApplication;
-import com.tronography.locationchat.LocationCheck;
 import com.tronography.locationchat.R;
 import com.tronography.locationchat.chatroom.ChatActivity;
 import com.tronography.locationchat.firebase.eventlisteners.ChatroomEventListener;
 import com.tronography.locationchat.login.LoginActivity;
-
-import java.io.IOException;
-import java.util.List;
+import com.tronography.locationchat.utils.AppUtils;
+import com.tronography.locationchat.utils.LocationHelper;
+import com.tronography.locationchat.utils.LocationTracker;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import timber.log.Timber;
 
-import static com.tronography.locationchat.LocationCheck.LocationCallback;
 
-
-public class LobbyActivity extends AppCompatActivity implements Lobby.View,
-        LocationCallback {
+public class LobbyActivity extends AppCompatActivity implements Lobby.View, LocationTracker.onLocationListener {
 
     private static final String TAG = LobbyActivity.class.getSimpleName();
 
@@ -45,7 +39,12 @@ public class LobbyActivity extends AppCompatActivity implements Lobby.View,
     ProgressBar progressBar;
     @Inject
     LobbyPresenter presenter;
-    private LocationCheck mLocationCheck;
+    @Inject
+    AppUtils mAppUtils;
+    @Inject
+    LocationTracker locationTracker;
+    @Inject
+    LocationHelper locationHelper;
 
     public static Intent provideIntent(Context context) {
         return new Intent(context, LobbyActivity.class);
@@ -58,10 +57,10 @@ public class LobbyActivity extends AppCompatActivity implements Lobby.View,
         ButterKnife.bind(this);
         ((ChatApplication) getApplicationContext()).getAppComponent().inject(this);
 
+        locationTracker.setLocationListener(this);
         presenter.setView(this);
         presenter.verifyUserAuth();
         attachFirebaseEventListener();
-        mLocationCheck = new LocationCheck(this, this);
     }
 
     private void attachFirebaseEventListener() {
@@ -72,13 +71,13 @@ public class LobbyActivity extends AppCompatActivity implements Lobby.View,
     @Override
     protected void onResume() {
         super.onResume();
-        mLocationCheck.connect();
+        locationTracker.connect();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mLocationCheck.disconnect();
+        locationTracker.disconnect();
     }
 
     @Override
@@ -107,22 +106,10 @@ public class LobbyActivity extends AppCompatActivity implements Lobby.View,
     }
 
     @Override
-    public void handleNewLocation(Location location) {
-        Log.e(TAG, "handleNewLocation: CALLED");
-        Log.e(TAG, location.toString());
-        double currentLatitude = location.getLatitude();
-        double currentLongitude = location.getLongitude();
+    public void onConnected(Location location) {
+        String postalCode = locationHelper.getPostalCode(location.getLatitude(),
+                location.getLongitude());
 
-        Geocoder geocoder = new Geocoder(this);
-
-        try {
-            List<Address> fromLocation = geocoder.getFromLocation(currentLatitude, currentLongitude, 1);
-            Log.e(TAG, "handleNewLocation: " + fromLocation.get(0).toString());
-            String postalCode = fromLocation.get(0).getPostalCode();
-            presenter.retrieveChatroom(postalCode);
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.e(TAG, "handleNewLocation: " + e);
-        }
+        presenter.retrieveChatroom(postalCode);
     }
 }
