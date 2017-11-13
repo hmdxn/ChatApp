@@ -18,6 +18,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
 }
 
 dependencies {
@@ -35,7 +39,12 @@ dependencies {
     compile 'com.google.firebase:firebase-auth:11.6.0'
     compile 'com.google.android.gms:play-services-location:11.6.0'
 
+
+
+    compile "com.jakewharton.timber:timber:$rootProject.ext.timberVersion"
     compile 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor "com.jakewharton:butterknife-compiler:8.8.1"
+
     compile 'com.squareup.okhttp3:okhttp:3.7.0'
     compile 'com.squareup.retrofit2:retrofit:2.2.0'
     compile 'com.squareup.retrofit2:converter-gson:2.2.0'
@@ -47,3 +56,5 @@ dependencies {
 
     testCompile 'junit:junit:4.12'
 }
+
+apply plugin: 'com.google.gms.google-services'

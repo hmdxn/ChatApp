@@ -1,4 +1,4 @@
-package com.tronography.locationchat.firebase;
+package com.tronography.locationchat.firebase.datamangers;
 
 import android.util.Log;
 
@@ -6,17 +6,16 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.tronography.locationchat.firebase.utils.FirebaseDatabaseReference;
 import com.tronography.locationchat.listeners.RetrieveChatRoomListener;
 import com.tronography.locationchat.model.Chatroom;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import static android.content.ContentValues.TAG;
 import static com.tronography.locationchat.utils.Constants.CHATROOM;
 import static com.tronography.locationchat.utils.Constants.CHATROOMS;
 import static com.tronography.locationchat.utils.ObjectUtils.isNull;
-import static io.reactivex.internal.util.NotificationLite.getValue;
 
 
 public class ChatRoomDataManager {

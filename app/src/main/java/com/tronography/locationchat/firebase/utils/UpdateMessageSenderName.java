@@ -1,4 +1,4 @@
-package com.tronography.locationchat.firebase;
+package com.tronography.locationchat.firebase.utils;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -14,20 +14,20 @@ import com.tronography.locationchat.model.User;
 import java.util.HashMap;
 import java.util.Objects;
 
-import static android.content.ContentValues.TAG;
 import static com.tronography.locationchat.utils.Constants.CHATROOM;
 
 
 public class UpdateMessageSenderName {
 
     private User user;
+    private static final String TAG = UpdateMessageSenderName.class.getSimpleName();
 
 
     public UpdateMessageSenderName(User user) {
         this.user = user;
     }
 
-    public void updateSenderName() {
+    public void applyChanges() {
         FirebaseDatabaseReference.getChatRoomReference().addListenerForSingleValueEvent(new ValueEventListener() {
 
             @Override
@@ -40,7 +40,7 @@ public class UpdateMessageSenderName {
                             .child(CHATROOM)
                             .getValue(Chatroom.class);
                     Log.e(TAG, "getMessageLog: " + chatroom.getName());
-                    updateMessageSenderName(user, chatroom.getId());
+                    findAndUpdatePreviouslySentMessages(user, chatroom.getName());
                 }
             }
 
@@ -48,12 +48,11 @@ public class UpdateMessageSenderName {
             public void onCancelled(DatabaseError databaseError) {
                 Log.e(TAG, "onCancelled: " + databaseError.toString());
             }
-
         });
     }
 
-    private void updateMessageSenderName(final User user, final String roomID) {
-        FirebaseDatabaseReference.getChatRoomMessageRef(roomID).addListenerForSingleValueEvent(new ValueEventListener() {
+    private void findAndUpdatePreviouslySentMessages(final User user, final String roomName) {
+        FirebaseDatabaseReference.getChatRoomMessageRef(roomName).addListenerForSingleValueEvent(new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -67,7 +66,7 @@ public class UpdateMessageSenderName {
                             .getValue(Message.class);
 
                     if (Objects.equals(message.getSenderId(), user.getId())) {
-                        applySenderNameChangeInFirebase(roomID, message, user.getUsername());
+                        updateSenderName(roomName, message, user.getUsername());
                     }
                 }
             }
@@ -79,13 +78,13 @@ public class UpdateMessageSenderName {
         });
     }
 
-    private DatabaseReference getMessagesByChatRoomID(String roomID) {
-        return FirebaseDatabaseReference.getMessageReference().child(roomID);
+    private DatabaseReference getMessagesByChatroomName(String roomName) {
+        return FirebaseDatabaseReference.getMessageReference().child(roomName);
     }
 
-    private void applySenderNameChangeInFirebase(String roomID, Message messagModel, String newUserName) {
+    private void updateSenderName(String roomName, Message messagModel, String newUserName) {
         //reference the unique key object in the database
-        DatabaseReference messageRoot = getMessagesByChatRoomID(roomID).child(messagModel.getMessageId());
+        DatabaseReference messageRoot = getMessagesByChatroomName(roomName).child(messagModel.getMessageId());
         messagModel.setSenderName(newUserName);
         //now we must generate the children of this new object
         HashMap<String, Object> userModelMap = setDatabaseMessageValues(messagModel);

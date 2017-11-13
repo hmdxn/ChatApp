@@ -77,4 +77,7 @@
     <string name="id_fmt">User ID: %s</string>
     <string name="email_fmt">Email: %s</string>
     <string name="Edit">EDIT</string>
+    <string name="warning_play_services">Google Play Services unavailable</string>
+    <string name="warning_invalid_link">Invalid Link</string>
+    <string name="toast_network_not_available">Network unavailable</string>
 </resources>

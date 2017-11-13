@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#FF424242</color>
+    <color name="colorPrimary">#525254</color>
     <color name="colorPrimaryDark">#303030</color>
-    <color name="colorAccent">#EF7674</color>
+    <color name="colorAccent">#FF6B12</color>
     
     <!--red-->
-    <color name="carmine_pink_lite">#DB6B71</color>
+    <color name="carmine_pink_lite">#525254</color>
     
     <!--greyscale-->
     <color name="charcoal">#FF424242</color>
     <color name="dark_charcoal">#303030</color>
     <color name="black">#252525</color>
-    <color name="primary_background">#ecf0f1</color>
-    <color name="cardBackgroundColor">#ffffff</color>
+    <color name="primary_background">#BFC0C0</color>
+    <color name="cardBackgroundColor">#FBFBFF</color>
     
-    <!--yellow-->
-    <color name="red_madder">#EF7674</color>
+    <color name="red_madder">#EF8354</color>
     
     
     <color name="light_font">#FBFBFB</color>

@@ -1,6 +1,7 @@
-package com.tronography.locationchat;
+package com.tronography.locationchat.utils;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.IntentSender;
@@ -19,7 +20,7 @@ import com.google.android.gms.location.LocationServices;
 /**
  * Created by jonat on 11/5/2017.
  */
-
+@SuppressLint("MissingPermission")
 public class LocationCheck implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
