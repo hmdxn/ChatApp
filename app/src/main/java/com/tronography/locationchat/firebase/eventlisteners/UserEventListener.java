@@ -3,7 +3,7 @@ package com.tronography.locationchat.firebase.eventlisteners;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.tronography.locationchat.chatroom.ChatPresenter;
+import com.tronography.locationchat.chatroom.ChatroomPresenter;
 import com.tronography.locationchat.firebase.utils.FirebaseDatabaseReference;
 
 /**
@@ -12,7 +12,7 @@ import com.tronography.locationchat.firebase.utils.FirebaseDatabaseReference;
 
 public class UserEventListener {
 
-    public void addUserChildEventListener(final ChatPresenter presenter) {
+    public void addUserChildEventListener(final ChatroomPresenter presenter) {
 
         FirebaseDatabaseReference.getUserReference().addChildEventListener(new ChildEventListener() {
             @Override

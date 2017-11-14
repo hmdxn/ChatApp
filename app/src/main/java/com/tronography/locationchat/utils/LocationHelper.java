@@ -39,11 +39,11 @@ public class LocationHelper {
                     admin = admin.substring(0, 10) + "..";
                 }
                 if (locality != null && subLocality != null) {
-                    location = subLocality + "," + locality;
+                    location = subLocality + ", " + locality;
                 } else if (subLocality != null) {
-                    location = subLocality + "," + admin;
+                    location = subLocality + ", " + admin;
                 } else {
-                    location = locality + "," + admin;
+                    location = locality + ", " + admin;
                 }
             }
         } catch (IOException e) {
@@ -105,11 +105,11 @@ public class LocationHelper {
                 }
 
                 if (address.getThoroughfare() != null) {
-                    street = address.getSubLocality() + "," + address.getThoroughfare();
+                    street = address.getSubLocality() + ", " + address.getThoroughfare();
                 } else {
-                    street = address.getSubLocality() + "," + address.getFeatureName();
+                    street = address.getSubLocality() + ", " + address.getFeatureName();
                 }
-                location = street + "," + city + "," + zip + "," + state;
+                location = street + ", " + city + ", " + zip + ", " + state;
             }
         } catch (IOException e) {
             e.printStackTrace();

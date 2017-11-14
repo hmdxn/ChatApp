@@ -3,9 +3,10 @@ package com.tronography.locationchat.firebase.utils;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import static com.tronography.locationchat.utils.Constants.CHATROOMS;
-import static com.tronography.locationchat.utils.Constants.MEMBERS;
-import static com.tronography.locationchat.utils.Constants.MESSAGES;
+import static com.tronography.locationchat.utils.Constants.Firebase.CHATROOMS;
+import static com.tronography.locationchat.utils.Constants.Firebase.MEMBERS;
+import static com.tronography.locationchat.utils.Constants.Firebase.MESSAGES;
+
 
 /**
  * Created by jonathancolon on 8/26/17.

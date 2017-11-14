@@ -14,8 +14,8 @@ import com.tronography.locationchat.model.User;
 import java.util.HashMap;
 
 import static android.content.ContentValues.TAG;
-import static com.tronography.locationchat.utils.Constants.MEMBERS;
-import static com.tronography.locationchat.utils.Constants.USER_MODEL;
+import static com.tronography.locationchat.utils.Constants.Firebase.MEMBERS;
+import static com.tronography.locationchat.utils.Constants.Firebase.USER_MODEL;
 import static com.tronography.locationchat.utils.ObjectUtils.isNull;
 
 

@@ -13,8 +13,9 @@ import com.tronography.locationchat.model.Chatroom;
 import java.util.HashMap;
 
 import static android.content.ContentValues.TAG;
-import static com.tronography.locationchat.utils.Constants.CHATROOM;
-import static com.tronography.locationchat.utils.Constants.CHATROOMS;
+
+import static com.tronography.locationchat.utils.Constants.Firebase.CHATROOM;
+import static com.tronography.locationchat.utils.Constants.Firebase.CHATROOMS;
 import static com.tronography.locationchat.utils.ObjectUtils.isNull;
 
 

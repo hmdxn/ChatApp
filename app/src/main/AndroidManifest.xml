@@ -19,7 +19,7 @@
         
         <!--activities-->
         <activity
-            android:name=".chatroom.ChatActivity"
+            android:name=".chatroom.ChatroomActivity"
             android:windowSoftInputMode="stateHidden|adjustResize">
         </activity>
         

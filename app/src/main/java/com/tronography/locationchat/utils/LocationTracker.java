@@ -71,7 +71,6 @@ public class LocationTracker implements GoogleApiClient.ConnectionCallbacks,
 
     @Override
     public void onConnected(Bundle bundle) {
-        displayLocation();
         startLocationUpdates();
     }
 

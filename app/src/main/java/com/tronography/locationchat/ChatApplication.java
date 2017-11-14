@@ -3,6 +3,7 @@ package com.tronography.locationchat;
 import android.app.Application;
 
 import com.google.firebase.FirebaseApp;
+import com.tronography.locationchat.utils.Constants;
 import com.tronography.locationchat.utils.UtilsModule;
 
 

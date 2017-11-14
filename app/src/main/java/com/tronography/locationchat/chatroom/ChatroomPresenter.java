@@ -19,22 +19,22 @@ import javax.inject.Inject;
 import static com.tronography.locationchat.utils.ObjectUtils.isNull;
 
 
-public class ChatPresenter implements RetrieveMessageLogListener,
+public class ChatroomPresenter implements RetrieveMessageLogListener,
         RetrieveUserListener {
 
     private String mUserId;
-    private Chat.View view;
+    private Chatroom.View view;
     private MessageDataManager mMessageDataManager = new MessageDataManager(this);
     private UserDataManager mUserDataManager = new UserDataManager(this);
     private String mRoomId;
     private User mUser;
     private FirebaseAuth mAuth;
     private ArrayList<Message> messageLog = new ArrayList<>();
-    private static final String TAG = ChatPresenter.class.getSimpleName();
+    private static final String TAG = ChatroomPresenter.class.getSimpleName();
 
 
     @Inject
-    public ChatPresenter() {
+    public ChatroomPresenter() {
     }
 
     void sendMessage(String message) {
@@ -97,7 +97,6 @@ public class ChatPresenter implements RetrieveMessageLogListener,
         if (user != null) {
             mUserId = user.getUid();
             loadReturningUser(user.getUid());
-            view.showMessage(user.toString());
         } else {
             view.launchLoginActivity();
         }
@@ -107,7 +106,7 @@ public class ChatPresenter implements RetrieveMessageLogListener,
         view.scrollToBottom(messageLog);
     }
 
-    public void setView(Chat.View view) {
+    public void setView(Chatroom.View view) {
         this.view = view;
     }
 
