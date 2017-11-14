@@ -60,7 +60,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login_alternate);
+        setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
         retrieveUserListener = this;
         userDataManager = new UserDataManager(this);

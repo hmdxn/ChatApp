@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static android.content.ContentValues.TAG;
-import static com.tronography.locationchat.utils.Constants.MESSAGE_MODEL;
+import static com.tronography.locationchat.utils.Constants.Firebase.MESSAGE_MODEL;
 import static com.tronography.locationchat.utils.ObjectUtils.isNull;
 
 

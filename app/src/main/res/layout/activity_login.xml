@@ -1,130 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:id="@+id/main_layout"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-              android:weightSum="4">
-    
-    <LinearLayout
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/title_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/emailpassword_title_text"
+        android:theme="@style/ThemeOverlay.MyTitleText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/email_field"/>
+
+    <TextView
+        android:id="@+id/status"
+        style="@style/ThemeOverlay.MyTextDetail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/signed_out"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/title_text"/>
+
+    <TextView
+        android:id="@+id/detail"
+        style="@style/ThemeOverlay.MyTextDetail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Firebase User ID: 123456789abc"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/email_field"/>
+
+
+    <EditText
+        android:id="@+id/email_field"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="3"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
-        
-        <TextView
-            android:id="@+id/title_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/title_bottom_margin"
-            android:text="@string/emailpassword_title_text"
-            android:theme="@style/ThemeOverlay.MyTitleText" />
-        
-        <TextView
-            android:id="@+id/status"
-            style="@style/ThemeOverlay.MyTextDetail"
-            android:text="@string/signed_out" />
-        
-        <TextView
-            android:id="@+id/detail"
-            style="@style/ThemeOverlay.MyTextDetail"
-            tools:text="Firebase User ID: 123456789abc" />
-    
-    </LinearLayout>
-    
-    
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center_vertical">
-        
-        <LinearLayout
-            android:id="@+id/email_password_fields"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp">
-            
-            <EditText
-                android:id="@+id/email_field"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="@string/hint_email"
-                android:inputType="textEmailAddress" />
-            
-            <EditText
-                android:id="@+id/password_field"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="@string/hint_password"
-                android:inputType="textPassword" />
-        </LinearLayout>
-        
-        <LinearLayout
-            android:id="@+id/email_password_buttons"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/email_password_fields"
-            android:orientation="horizontal"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp">
-            
-            <Button
-                android:id="@+id/email_sign_in_button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/sign_in"
-                android:background="@color/colorAccent"
-                android:textColor="@color/light_font"
-                android:theme="@style/ThemeOverlay.MyDarkButton" />
-            
-            <Button
-                android:id="@+id/email_create_account_button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/create_account"
-                android:background="@color/colorAccent"
-                android:textColor="@color/light_font"
-                android:theme="@style/ThemeOverlay.MyDarkButton" />
-        </LinearLayout>
-        
-        <LinearLayout
-            android:id="@+id/signed_in_buttons"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:orientation="horizontal"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:visibility="gone"
-            android:weightSum="2.0">
+        android:layout_height="wrap_content"
+        android:hint="@string/hint_email"
+        android:inputType="textEmailAddress"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
-            <Button
-                android:id="@+id/sign_out_button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.0"
-                android:text="@string/sign_out"
-                android:theme="@style/ThemeOverlay.MyDarkButton" />
 
-            <Button
-                android:id="@+id/verify_email_button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.0"
-                android:text="@string/verify_email"
-                android:theme="@style/ThemeOverlay.MyDarkButton" />
-        
-        </LinearLayout>
-    
-    </RelativeLayout>
 
-</LinearLayout>
+    <EditText
+        android:id="@+id/password_field"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint_password"
+        android:inputType="textPassword"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintStart_toStartOf="@id/email_field"
+        app:layout_constraintTop_toBottomOf="@id/email_field"/>
+
+
+    <Button
+        android:id="@+id/email_sign_in_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="16dp"
+        android:background="@color/colorAccent"
+        android:text="@string/sign_in"
+        android:textColor="@color/light_font"
+        android:theme="@style/ThemeOverlay.MyDarkButton"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/email_create_account_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/password_field" />
+
+    <Button
+        android:id="@+id/email_create_account_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="8dp"
+        android:background="@color/colorAccent"
+        android:text="@string/create_account"
+        android:textColor="@color/light_font"
+        android:theme="@style/ThemeOverlay.MyDarkButton"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/email_sign_in_button"
+        app:layout_constraintTop_toBottomOf="@id/password_field" />
+
+
+</android.support.constraint.ConstraintLayout>

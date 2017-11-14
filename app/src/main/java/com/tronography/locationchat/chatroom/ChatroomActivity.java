@@ -24,6 +24,7 @@ import com.tronography.locationchat.firebase.eventlisteners.UserEventListener;
 import com.tronography.locationchat.login.LoginActivity;
 import com.tronography.locationchat.model.Message;
 import com.tronography.locationchat.userprofile.UserProfileActivity;
+import com.tronography.locationchat.utils.AppUtils;
 
 import java.util.ArrayList;
 
@@ -33,15 +34,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.tronography.locationchat.utils.EditTextUtils.clearText;
 import static com.tronography.locationchat.utils.ObjectUtils.isEmpty;
 
-public class ChatActivity extends AppCompatActivity implements Chat.View,
-        ChatAdapter.Listener {
+public class ChatroomActivity extends AppCompatActivity implements Chatroom.View,
+        ChatroomAdapter.Listener {
 
     private static final String ROOM_ID_KEY = "room_id";
     private static final String ROOM_NAME_KEY = "room_name";
-    private final String TAG = ChatActivity.class.getSimpleName();
+    private final String TAG = ChatroomActivity.class.getSimpleName();
 
     @BindView(R.id.chat_input_et)
     EditText editText;
@@ -52,15 +52,18 @@ public class ChatActivity extends AppCompatActivity implements Chat.View,
     @BindView(R.id.toolbar_chatroom)
     Toolbar toolbar;
 
-    private ChatAdapter adapter;
+    private ChatroomAdapter adapter;
 
     @Inject
-    ChatPresenter presenter;
+    AppUtils appUtils;
+
+    @Inject
+    ChatroomPresenter presenter;
     private String roomName;
 
 
     public static Intent provideIntent(Context context, String roomName) {
-        Intent intent = new Intent(context, ChatActivity.class);
+        Intent intent = new Intent(context, ChatroomActivity.class);
         intent.putExtra(ROOM_NAME_KEY, roomName);
         return intent;
     }
@@ -107,7 +110,7 @@ public class ChatActivity extends AppCompatActivity implements Chat.View,
 
     @Override
     public void setupAdapter(ArrayList<Message> messageLog) {
-        adapter = new ChatAdapter(this);
+        adapter = new ChatroomAdapter(this);
         adapter.setData(messageLog);
     }
 
@@ -138,13 +141,13 @@ public class ChatActivity extends AppCompatActivity implements Chat.View,
         if (!isEmpty(message)) {
             presenter.sendMessage(message.trim());
             adapter.notifyDataSetChanged();
-            clearText(editText, this);
+            appUtils.clearText(editText);
         }
     }
 
     @Override
     public void refreshMessageRecyclerView(ArrayList<Message> messageLog) {
-        ChatAdapter adapter = (ChatAdapter) recyclerView.getAdapter();
+        ChatroomAdapter adapter = (ChatroomAdapter) recyclerView.getAdapter();
         adapter.setData(messageLog);
     }
 

@@ -5,7 +5,7 @@ import android.util.Log;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.tronography.locationchat.chatroom.ChatPresenter;
+import com.tronography.locationchat.chatroom.ChatroomPresenter;
 import com.tronography.locationchat.firebase.utils.FirebaseDatabaseReference;
 import com.tronography.locationchat.model.Message;
 
@@ -17,7 +17,7 @@ public class MessageEventListener {
 
     private static final String TAG = MessageEventListener.class.getSimpleName();
 
-    public void addMessageChildEventListener(final ChatPresenter presenter, String roomID) {
+    public void addMessageChildEventListener(final ChatroomPresenter presenter, String roomID) {
         FirebaseDatabaseReference.getChatRoomMessageRef(roomID)
                 .addChildEventListener(new ChildEventListener() {
 

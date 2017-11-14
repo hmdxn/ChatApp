@@ -5,7 +5,7 @@ import com.tronography.locationchat.model.Message;
 import java.util.ArrayList;
 
 
-interface Chat {
+interface Chatroom {
 
     interface View {
 

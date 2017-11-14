@@ -1,8 +1,5 @@
 package com.tronography.locationchat.utils;
 
-/**
- * Created by jonat on 11/13/2017.
- */
 
 import android.app.Activity;
 import android.content.Context;
@@ -67,7 +64,7 @@ public class AppUtils {
      *
      * @param view : pass the EditText
      */
-    public static void clearText(EditText view) {
+    public void clearText(EditText view) {
         view.setText("");
     }
 
@@ -78,7 +75,7 @@ public class AppUtils {
      * @param text text to be displayed on snackbar
      */
     public void showSnackBar(View view, String text) {
-        Snackbar.make(view, text, Snackbar.LENGTH_SHORT).show();
+        Snackbar.make(view, text, Snackbar.LENGTH_LONG).show();
     }
 
     /**
@@ -88,23 +85,6 @@ public class AppUtils {
      */
     public void showToast(String text) {
         Toast.makeText(mContext, text, Toast.LENGTH_SHORT).show();
-    }
-
-    /**
-     * To open a website in phone browser
-     *
-     * @param address valid email link
-     */
-    public void openBrowser(String address) {
-        try {
-            if (!address.startsWith("http://") && !address.startsWith("https://")) {
-                address = "http://" + address;
-            }
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(address));
-            mContext.startActivity(browserIntent);
-        } catch (Exception e) {
-            showToast(mContext.getResources().getString(R.string.warning_invalid_link));
-        }
     }
 
     /**
@@ -128,17 +108,6 @@ public class AppUtils {
     }
 
     /**
-     * redirect user to your application settings in device
-     */
-    public void redirectToAppSettings() {
-        Intent intent = new Intent();
-        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        Uri uri = Uri.fromParts("package", mContext.getPackageName(), null);
-        intent.setData(uri);
-        mContext.startActivity(intent);
-    }
-
-    /**
      * check if user has enabled Gps of device
      *
      * @return true or false depending upon device Gps status
@@ -156,8 +125,4 @@ public class AppUtils {
                 Settings.ACTION_LOCATION_SOURCE_SETTINGS);
         mContext.startActivity(callGPSSettingIntent);
     }
-
-    //enable / disable views using Butterknife
-    public final ButterKnife.Setter<View, Boolean> ENABLED = (view, value, index) -> view.setEnabled(value);
-
 }

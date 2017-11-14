@@ -14,7 +14,7 @@ import com.tronography.locationchat.model.User;
 import java.util.HashMap;
 import java.util.Objects;
 
-import static com.tronography.locationchat.utils.Constants.CHATROOM;
+import static com.tronography.locationchat.utils.Constants.Firebase.CHATROOM;
 
 
 public class UpdateMessageSenderName {

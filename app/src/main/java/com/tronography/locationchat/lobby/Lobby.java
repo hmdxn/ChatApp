@@ -11,6 +11,8 @@ interface Lobby {
 
         void launchChatroomActivity(String roomName);
 
-        void showChatroom(String chatroomName);
+        void showChatroomDetails(String chatroomName);
+
+        void showCurrentLocationDetails(String location);
     }
 }
