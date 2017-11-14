@@ -6,6 +6,11 @@ package com.tronography.locationchat.utils;
 
 public class Constants {
 
+    public class ResultCodes {
+        public static final int RESULT_LOAD_BACKGROUND_IMG = 200;
+        public static final int RESULT_LOAD_PROFILE_IMG = 100;
+    }
+
     public class Firebase {
         public static final String USER_MODEL = "user_model";
         public static final String MEMBERS = "members";

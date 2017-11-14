@@ -24,7 +24,7 @@
                 android:layout_height="wrap_content">
                 
                 <ImageView
-                    android:id="@+id/background_image"
+                    android:id="@+id/background_iv"
                     android:layout_width="0dp"
                     android:layout_height="230dp"
                     android:scaleType="centerCrop"
@@ -35,7 +35,7 @@
                     app:layout_constraintTop_toTopOf="parent"/>
                 
                 <ImageView
-                    android:id="@+id/contact_image"
+                    android:id="@+id/profile_iv"
                     android:layout_width="84dp"
                     android:layout_height="84dp"
                     android:layout_gravity="start|center_vertical|center_horizontal"
