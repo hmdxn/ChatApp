@@ -11,13 +11,9 @@ import java.util.Locale;
 /**
  * contains helper methods to manipulate user location
  */
-public class LocationHelper {
+public class LocationUtils {
 
-    private Context mContext;
 
-    public LocationHelper(Context context) {
-        this.mContext = context;
-    }
 
     /**
      * @param latitude  latitude of address
@@ -25,10 +21,10 @@ public class LocationHelper {
      * @return simplified address of location
      */
 
-    public String getSimplifiedAddress(double latitude, double longitude) {
+    public static String getSimplifiedAddress(Context context, double latitude, double longitude) {
         String location = "";
         try {
-            Geocoder geocoder = new Geocoder(mContext, Locale.getDefault());
+            Geocoder geocoder = new Geocoder(context, Locale.getDefault());
             List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
             if (addresses.size() > 0) {
                 Address address = addresses.get(0);
@@ -59,10 +55,10 @@ public class LocationHelper {
      * @param longitude : longitude of address
      * @return postal code of location
      */
-    public String getPostalCode(double latitude, double longitude) {
+    public static String getPostalCode(Context context, double latitude, double longitude) {
         String location = "";
         try {
-            Geocoder geocoder = new Geocoder(mContext, Locale.getDefault());
+            Geocoder geocoder = new Geocoder(context, Locale.getDefault());
             List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
             if (addresses.size() > 0) {
                 location = addresses.get(0).getPostalCode();
@@ -80,10 +76,10 @@ public class LocationHelper {
      * @return complete address of location
      */
 
-    public String getCompleteAddress(double latitude, double longitude) {
+    public String getCompleteAddress(Context context, double latitude, double longitude) {
         String location = "";
         try {
-            Geocoder geocoder = new Geocoder(mContext, Locale.getDefault());
+            Geocoder geocoder = new Geocoder(context, Locale.getDefault());
             List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
             if (addresses.size() > 0) {
                 Address address = addresses.get(0);
@@ -124,9 +120,9 @@ public class LocationHelper {
      * @param strAddress address string
      * @return lat and lng in comma separated string
      */
-    public String getLocationFromAddress(String strAddress) {
+    public String getLocationFromAddress(Context context, String strAddress) {
 
-        Geocoder coder = new Geocoder(mContext);
+        Geocoder coder = new Geocoder(context);
         List<Address> address;
 
         try {

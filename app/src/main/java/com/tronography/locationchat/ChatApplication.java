@@ -2,10 +2,6 @@ package com.tronography.locationchat;
 
 import android.app.Application;
 
-import com.google.firebase.FirebaseApp;
-import com.tronography.locationchat.utils.Constants;
-import com.tronography.locationchat.utils.UtilsModule;
-
 
 public class ChatApplication extends Application {
 
@@ -25,7 +21,6 @@ public class ChatApplication extends Application {
         return DaggerAppComponent.builder()
                 .appModule(new AppModule(this))
                 .sharedPrefModule(new SharedPrefModule())
-                .utilsModule(new UtilsModule(this))
                 .build();
     }
 

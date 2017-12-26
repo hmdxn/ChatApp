@@ -55,9 +55,6 @@ public class ChatroomActivity extends AppCompatActivity implements Chatroom.View
     private ChatroomAdapter adapter;
 
     @Inject
-    AppUtils appUtils;
-
-    @Inject
     ChatroomPresenter presenter;
     private String roomName;
 
@@ -141,7 +138,7 @@ public class ChatroomActivity extends AppCompatActivity implements Chatroom.View
         if (!isEmpty(message)) {
             presenter.sendMessage(message.trim());
             adapter.notifyDataSetChanged();
-            appUtils.clearText(editText);
+            AppUtils.clearText(editText);
         }
     }
 

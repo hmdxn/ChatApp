@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:focusableInTouchMode="true"
-    tools:context="com.tronography.locationchat.chatroom.ChatroomActivity">
+    tools:context="com.tronography.locationchat.chatRoom.ChatroomActivity">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar_chatroom"

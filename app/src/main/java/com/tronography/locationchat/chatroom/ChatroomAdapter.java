@@ -37,8 +37,6 @@ public class ChatroomAdapter extends RecyclerView.Adapter {
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view;
 
-        System.out.println("viewType = " + viewType);
-
         if (viewType == VIEW_TYPE_MESSAGE_SENT) {
             view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.itemview_message_sent, parent, false);
@@ -123,19 +121,11 @@ public class ChatroomAdapter extends RecyclerView.Adapter {
             }
             Log.i(TAG, "bind: RECEIVED CALLED");
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    listener.onMessageClicked(message);
-                }
-            });
+            itemView.setOnClickListener(view -> listener.onMessageClicked(message));
 
-            itemView.setOnLongClickListener(new OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    listener.onMessageLongClicked(message);
-                    return true;
-                }
+            itemView.setOnLongClickListener(view -> {
+                listener.onMessageLongClicked(message);
+                return true;
             });
         }
     }
@@ -165,12 +155,9 @@ public class ChatroomAdapter extends RecyclerView.Adapter {
                 }
             });
 
-            itemView.setOnLongClickListener(new OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    listener.onMessageLongClicked(message);
-                    return true;
-                }
+            itemView.setOnLongClickListener(view -> {
+                listener.onMessageLongClicked(message);
+                return true;
             });
         }
     }

@@ -57,9 +57,6 @@ public class UserProfileActivity extends AppCompatActivity implements UserProfil
     public final static String SENDER_ID_KEY = "sender_id";
 
     @Inject
-    AppUtils appUtils;
-
-    @Inject
     public UserProfilePresenter presenter;
     private ProgressDialog progressDialog;
 
@@ -126,10 +123,10 @@ public class UserProfileActivity extends AppCompatActivity implements UserProfil
                         break;
                 }
             } else {
-                appUtils.showSnackBar(profileImage, getString(R.string.error_message_photo_not_selected));
+                AppUtils.showSnackBar(profileImage, getString(R.string.error_message_photo_not_selected));
             }
         } catch (Exception e) {
-            appUtils.showSnackBar(profileImage, e.getMessage());
+            AppUtils.showSnackBar(profileImage, e.getMessage());
         }
     }
 

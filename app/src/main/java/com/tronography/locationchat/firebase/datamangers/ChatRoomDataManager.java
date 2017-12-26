@@ -8,7 +8,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.tronography.locationchat.firebase.utils.FirebaseDatabaseReference;
 import com.tronography.locationchat.listeners.RetrieveChatRoomListener;
-import com.tronography.locationchat.model.Chatroom;
+import com.tronography.locationchat.model.ChatRoom;
 
 import java.util.HashMap;
 
@@ -33,16 +33,16 @@ public class ChatRoomDataManager {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Chatroom chatroom = dataSnapshot
+                ChatRoom chatRoom = dataSnapshot
                         .child(CHATROOMS)
                         .child(postalCode)
                         .child("chatroom")
-                        .getValue(Chatroom.class);
+                        .getValue(ChatRoom.class);
 
-                if (!isNull(chatroom)) {
-                    retrieveChatRoomListener.onChatRoomRetrieved(chatroom);
+                if (!isNull(chatRoom)) {
+                    retrieveChatRoomListener.onChatRoomRetrieved(chatRoom);
                 } else {
-                    addToFirebase(new Chatroom(postalCode));
+                    addToFirebase(new ChatRoom(postalCode));
                 }
             }
 
@@ -53,14 +53,14 @@ public class ChatRoomDataManager {
         });
     }
 
-    public void addToFirebase(Chatroom chatroom) {
+    public void addToFirebase(ChatRoom chatRoom) {
         HashMap<String, Object> uniqueMemberIdentifier = new HashMap<>();
         FirebaseDatabaseReference.getChatRoomReference().updateChildren(uniqueMemberIdentifier);
 
-        DatabaseReference chatRoomRoot = FirebaseDatabaseReference.getChatRoomReference().child(chatroom.getName());
+        DatabaseReference chatRoomRoot = FirebaseDatabaseReference.getChatRoomReference().child(chatRoom.getName());
 
         HashMap<String, Object> chatRoomMap = new HashMap<>();
-        chatRoomMap.put(CHATROOM, chatroom);
+        chatRoomMap.put(CHATROOM, chatRoom);
 
         //confirm changes
         chatRoomRoot.updateChildren(chatRoomMap);

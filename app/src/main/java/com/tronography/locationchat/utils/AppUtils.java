@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.Uri;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.view.View;
@@ -19,7 +17,12 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.tronography.locationchat.R;
 
-import butterknife.ButterKnife;
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.support.v4.app.ActivityCompat.checkSelfPermission;
+import static android.support.v4.app.ActivityCompat.requestPermissions;
 
 /**
  * <p/>
@@ -27,10 +30,7 @@ import butterknife.ButterKnife;
  */
 public class AppUtils {
 
-    private Context mContext;
-
-    public AppUtils(Context context) {
-        this.mContext = context;
+    public AppUtils() {
     }
 
     /**
@@ -38,25 +38,33 @@ public class AppUtils {
      *
      * @return true if online else false
      */
-    public boolean isOnline(View v) {
-        ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        if (netInfo != null && netInfo.isConnectedOrConnecting()) {
-            return true;
+
+    public static boolean isOnline(Context context) {
+        boolean connected = false;
+        ConnectivityManager conectivtyManager =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        if (conectivtyManager != null) {
+            connected = conectivtyManager.getActiveNetworkInfo() != null
+                    && conectivtyManager.getActiveNetworkInfo().isAvailable()
+                    && conectivtyManager.getActiveNetworkInfo().isConnected();
         }
-        showSnackBar(v, mContext.getString(R.string.toast_network_not_available));
-        return false;
+
+        return connected;
     }
 
+    public static boolean checkPermissions(Activity activity) {
+        return checkSelfPermission(activity, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED
+                && checkSelfPermission(activity, ACCESS_COARSE_LOCATION) != PERMISSION_GRANTED
+                && checkSelfPermission(activity, READ_EXTERNAL_STORAGE) != PERMISSION_GRANTED;
+    }
 
-    /**
-     * Description : Hide the soft keyboard
-     *
-     * @param view : Pass the current view
-     */
-    public void hideSoftKeyboard(View view) {
-        InputMethodManager inputMethodManager = (InputMethodManager) mContext.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    public static void hideSoftKeyboard(Activity activity) {
+        InputMethodManager inputMethodManager =
+                (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        if (inputMethodManager != null) {
+            inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+        }
     }
 
     /**
@@ -64,7 +72,7 @@ public class AppUtils {
      *
      * @param view : pass the EditText
      */
-    public void clearText(EditText view) {
+    public static void clearText(EditText view) {
         view.setText("");
     }
 
@@ -74,7 +82,7 @@ public class AppUtils {
      * @param view view clicked
      * @param text text to be displayed on snackbar
      */
-    public void showSnackBar(View view, String text) {
+    public static void showSnackBar(View view, String text) {
         Snackbar.make(view, text, Snackbar.LENGTH_LONG).show();
     }
 
@@ -83,8 +91,8 @@ public class AppUtils {
      *
      * @param text text to be displayed on Toast
      */
-    public void showToast(String text) {
-        Toast.makeText(mContext, text, Toast.LENGTH_SHORT).show();
+    public static void showToast(Context context, String text) {
+        Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -92,15 +100,18 @@ public class AppUtils {
      * it doesn't, display a dialog that allows users to download the APK from
      * the Google Play Store or enable it in the device's system settings.
      */
-    public boolean checkPlayServices() {
+    public static boolean checkPlayServices(Activity activity) {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
-        int resultCode = apiAvailability.isGooglePlayServicesAvailable(mContext);
+        int resultCode = apiAvailability.isGooglePlayServicesAvailable(activity);
         if (resultCode != ConnectionResult.SUCCESS) {
             if (apiAvailability.isUserResolvableError(resultCode)) {
-                apiAvailability.getErrorDialog((Activity) mContext, resultCode, 9000)
+                apiAvailability.getErrorDialog(activity, resultCode, 9000)
                         .show();
             } else {
-                showToast(mContext.getResources().getString(R.string.warning_play_services));
+                showToast(activity,
+                        activity.getApplicationContext()
+                                .getResources()
+                                .getString(R.string.warning_play_services));
             }
             return false;
         }
@@ -112,17 +123,17 @@ public class AppUtils {
      *
      * @return true or false depending upon device Gps status
      */
-    public boolean isGpsEnabled() {
-        final LocationManager manager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-        return manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    public static boolean isGpsEnabled(Context context) {
+        final LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        return manager != null && manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
 
     /**
      * Redirect user to enable GPS
      */
-    public void goToGpsSettings() {
+    public void goToGpsSettings(Context context) {
         Intent callGPSSettingIntent = new Intent(
                 Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-        mContext.startActivity(callGPSSettingIntent);
+        context.startActivity(callGPSSettingIntent);
     }
 }

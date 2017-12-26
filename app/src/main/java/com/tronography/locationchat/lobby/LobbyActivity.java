@@ -1,31 +1,39 @@
 package com.tronography.locationchat.lobby;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.tronography.locationchat.ChatApplication;
 import com.tronography.locationchat.R;
 import com.tronography.locationchat.chatroom.ChatroomActivity;
+import com.tronography.locationchat.common.BaseActivity;
 import com.tronography.locationchat.firebase.eventlisteners.ChatroomEventListener;
 import com.tronography.locationchat.login.LoginActivity;
 import com.tronography.locationchat.utils.AppUtils;
-
-import org.w3c.dom.Text;
+import com.tronography.locationchat.utils.LocationUtils;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.observers.DisposableObserver;
+import pl.charmas.android.reactivelocation2.ReactiveLocationProvider;
+import pl.charmas.android.reactivelocation2.ReactiveLocationProviderConfiguration;
 
 
-public class LobbyActivity extends AppCompatActivity implements Lobby.View {
+public class LobbyActivity extends BaseActivity implements Lobby.View {
 
     private static final String TAG = LobbyActivity.class.getSimpleName();
 
@@ -41,8 +49,6 @@ public class LobbyActivity extends AppCompatActivity implements Lobby.View {
     TextView publicChatTitleTv;
     @Inject
     LobbyPresenter presenter;
-    @Inject
-    AppUtils appUtils;
 
     public static Intent provideIntent(Context context) {
         return new Intent(context, LobbyActivity.class);
@@ -68,15 +74,11 @@ public class LobbyActivity extends AppCompatActivity implements Lobby.View {
     @Override
     protected void onResume() {
         super.onResume();
-        if (appUtils.isOnline(chatroomCard)) {
-            presenter.connectLocationTracker();
-        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        presenter.disconnectLocationTracker();
     }
 
     @Override
@@ -88,6 +90,7 @@ public class LobbyActivity extends AppCompatActivity implements Lobby.View {
 
     @OnClick(R.id.chatroom_card)
     public void onChatroomClicked() {
+        Log.e(TAG, "onChatroomClicked: "  );
         presenter.enterChatroom(chatroomTv.getText().toString());
     }
 
@@ -107,7 +110,42 @@ public class LobbyActivity extends AppCompatActivity implements Lobby.View {
     }
 
     @Override
-    public void showCurrentLocationDetails(String location){
+    public void showCurrentLocationDetails(String location) {
         currentLocationTv.setText(location);
+    }
+
+    @SuppressLint("MissingPermission")
+    @Override
+    protected void onPermissionsGranted() {
+
+        Log.e(TAG, "isGpsEnabled: " + AppUtils.isGpsEnabled(this));
+
+        ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(
+                getApplicationContext(),
+                ReactiveLocationProviderConfiguration
+                        .builder()
+                        .setRetryOnConnectionSuspended(true)
+                        .build()
+        );
+
+        locationProvider.getLastKnownLocation()
+                .subscribe(new Consumer<Location>() {
+                    @Override
+                    public void accept(Location location) {
+                        Log.e(TAG, "getLastKnownLocation: " + location);
+                        String postalCode = LocationUtils.getPostalCode(
+                                LobbyActivity.this,
+                                location.getLatitude(),
+                                location.getLongitude());
+
+                        Log.e(TAG, "getLastKnownLocation: " + postalCode );
+
+                        presenter.retrieveChatroom(postalCode);
+                        Toast.makeText(
+                                LobbyActivity.this,
+                                postalCode,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }

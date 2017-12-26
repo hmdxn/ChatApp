@@ -1,10 +1,10 @@
 package com.tronography.locationchat.listeners;
 
-import com.tronography.locationchat.model.Chatroom;
+import com.tronography.locationchat.model.ChatRoom;
 
 
 public interface RetrieveChatRoomListener {
 
-    void onChatRoomRetrieved(Chatroom chatroom);
+    void onChatRoomRetrieved(ChatRoom chatRoom);
 
 }

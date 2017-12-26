@@ -6,16 +6,16 @@ import java.util.UUID;
  * Created by jonathancolon on 8/23/17.
  */
 
-public class Chatroom {
+public class ChatRoom {
 
     private String id;
     private String name;
     private int activeUsers;
 
-    public Chatroom() {
+    public ChatRoom() {
     }
 
-    public Chatroom(String name) {
+    public ChatRoom(String name) {
         this.name = name;
         id = UUID.randomUUID().toString();
     }
@@ -42,7 +42,7 @@ public class Chatroom {
 
     @Override
     public String toString() {
-        return "Chatroom{" +
+        return "ChatRoom{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", activeUsers=" + activeUsers +

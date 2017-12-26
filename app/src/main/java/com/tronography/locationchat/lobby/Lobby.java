@@ -1,7 +1,5 @@
 package com.tronography.locationchat.lobby;
 
-import com.tronography.locationchat.model.Chatroom;
-
 
 interface Lobby {
 
