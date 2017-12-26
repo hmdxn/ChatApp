@@ -6,7 +6,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0'
+        classpath 'com.android.tools.build:gradle:3.0.1'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
         classpath 'com.google.gms:google-services:3.1.2'
     }
@@ -24,6 +24,6 @@ task clean(type: Delete) {
 }
 
 ext {
-    timberVersion = '4.1.2'
+    timberVersion = '4.5.1'
     firebaseVersion = '11.6.0'
 }

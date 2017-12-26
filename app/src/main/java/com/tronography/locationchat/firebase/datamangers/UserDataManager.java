@@ -44,12 +44,29 @@ public class UserDataManager {
     }
 
     public void updateBio(User user, String bio) {
-        //reference the unique key object in the database
         DatabaseReference memberRoot = FirebaseDatabaseReference.getUserReference().child(user.getId());
         user.setBio(bio);
-        //now we must generate the children of this new object
+
         HashMap<String, Object> userModelMap = setDatabaseUserValues(user);
-        //confirm changes
+
+        memberRoot.updateChildren(userModelMap);
+    }
+
+    public void updateProfilePhoto(User user, String uri) {
+        DatabaseReference memberRoot = FirebaseDatabaseReference.getUserReference().child(user.getId());
+        user.setProfilePhoto(uri);
+
+        HashMap<String, Object> userModelMap = setDatabaseUserValues(user);
+
+        memberRoot.updateChildren(userModelMap);
+    }
+
+    public void updateBackgroundPhoto(User user, String uri) {
+        DatabaseReference memberRoot = FirebaseDatabaseReference.getUserReference().child(user.getId());
+        user.setBackgroundPhoto(uri);
+
+        HashMap<String, Object> userModelMap = setDatabaseUserValues(user);
+
         memberRoot.updateChildren(userModelMap);
     }
 
@@ -77,12 +94,11 @@ public class UserDataManager {
     }
 
     public void updateUsername(User userObject, String newUsername) {
-        //reference the unique key object in the database
         DatabaseReference memberRoot = FirebaseDatabaseReference.getUserReference().child(userObject.getId());
         userObject.setUsername(newUsername);
-        //now we must generate the children of this new object
+
         HashMap<String, Object> userModelMap = setDatabaseUserValues(userObject);
-        //confirm changes
+
         memberRoot.updateChildren(userModelMap);
     }
 

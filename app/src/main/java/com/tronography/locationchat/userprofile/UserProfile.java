@@ -8,6 +8,8 @@ public interface UserProfile {
 
     interface View{
 
+        void loadProfilePhoto(String uri);
+
         void enableDetailsEditText();
 
         void disableDetailsEditText();
@@ -19,6 +21,8 @@ public interface UserProfile {
         void showEditOption();
 
         void launchLoginActivity();
+
+        void loadBackgroundPhoto(String uri);
     }
 
 }

@@ -20,6 +20,7 @@ public class FirebaseDatabaseReference {
     private static DatabaseReference messageReference = database.getReference(MESSAGES);
     private static DatabaseReference userReference = database.getReference(MEMBERS);
 
+
     public static FirebaseDatabase getDatabase() {
         return database;
     }

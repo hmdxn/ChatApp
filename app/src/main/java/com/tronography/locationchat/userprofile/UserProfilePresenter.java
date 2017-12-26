@@ -21,7 +21,7 @@ public class UserProfilePresenter implements RetrieveMessageLogListener,
         RetrieveUserListener {
 
     private UserProfile.View view;
-    private User mUser;
+    private User user;
     private String mUserId;
     private String mSenderId;
     private MessageDataManager mMessageDataManager = new MessageDataManager(this);
@@ -39,12 +39,12 @@ public class UserProfilePresenter implements RetrieveMessageLogListener,
     }
 
     void saveChanges(String username, String bio) {
-        mMessageDataManager.updateSenderName(mUser);
+        mMessageDataManager.updateSenderName(user);
         firebaseUser.updateProfile(new UserProfileChangeRequest.Builder()
                 .setDisplayName(username)
                 .build());
-        mUserDataManager.updateUsername(mUser,username);
-        mUserDataManager.updateBio(mUser, bio);
+        mUserDataManager.updateUsername(user,username);
+        mUserDataManager.updateBio(user, bio);
     }
 
     void verifyUserAuth() {
@@ -60,13 +60,28 @@ public class UserProfilePresenter implements RetrieveMessageLogListener,
 
     @Override
     public void onUserRetrieved(User user) {
-        mUser = user;
-        System.out.println("mUser = " + mUser.toString());
-        view.setUsernameText(mUser.getUsername());
-        view.setBioText(mUser.getBio());
+        this.user = user;
+        System.out.println("user = " + this.user.toString());
+        if (user.getProfilePhoto() != null){
+            view.loadProfilePhoto(user.getProfilePhoto());
+        }
+
+        if (user.getBackgroundPhoto() != null){
+            view.loadBackgroundPhoto(user.getBackgroundPhoto());
+        }
+        view.setUsernameText(this.user.getUsername());
+        view.setBioText(this.user.getBio());
         if (mSenderId.equals(CURRENT_USER_ID)){
             view.showEditOption();
         }
+    }
+
+    public void saveProfilePhoto(String uri){
+        mUserDataManager.updateProfilePhoto(user, uri);
+    }
+
+    public void saveBackgroundPhoto(String uri){
+        mUserDataManager.updateBackgroundPhoto(user, uri);
     }
 
     @Override

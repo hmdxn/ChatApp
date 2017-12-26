@@ -7,6 +7,7 @@ public class User {
     private String id;
     private String username;
     private String profilePhoto;
+    private String backgroundPhoto;
     private String bio;
     private String location;
 
@@ -67,15 +68,24 @@ public class User {
     public void setLocation(String location) {
         this.location = location;
     }
-    
+
+    public String getBackgroundPhoto() {
+        return backgroundPhoto;
+    }
+
+    public void setBackgroundPhoto(String backgroundPhoto) {
+        this.backgroundPhoto = backgroundPhoto;
+    }
+
     @Override
     public String toString() {
         return "User{" +
-                ", id='" + id + '\'' +
+                "id='" + id + '\'' +
                 ", username='" + username + '\'' +
-                ", profilePhoto=" + profilePhoto +
+                ", profilePhoto='" + profilePhoto + '\'' +
+                ", backgroundPhoto='" + backgroundPhoto + '\'' +
+                ", bio='" + bio + '\'' +
+                ", location='" + location + '\'' +
                 '}';
     }
-
-
 }

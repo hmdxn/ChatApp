@@ -141,7 +141,7 @@ public class ChatroomActivity extends AppCompatActivity implements Chatroom.View
         if (!isEmpty(message)) {
             presenter.sendMessage(message.trim());
             adapter.notifyDataSetChanged();
-            appUtils.clearText(editText);
+            appUtils.clearEditText(editText);
         }
     }
 

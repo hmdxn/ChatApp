@@ -1,13 +1,21 @@
 package com.tronography.locationchat.chatroom;
 
+import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.bumptech.glide.request.RequestOptions;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.tronography.locationchat.R;
 import com.tronography.locationchat.model.Message;
 
@@ -17,16 +25,22 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.tronography.locationchat.utils.SharedPrefsUtils.*;
+import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_ID;
 
 public class ChatroomAdapter extends RecyclerView.Adapter {
+
+    //creating reference to firebase storage
+    FirebaseStorage storage = FirebaseStorage.getInstance();
+
+    // Create a storage reference from our app
+    StorageReference storageRef = storage.getReference();
 
     private static final int VIEW_TYPE_MESSAGE_SENT = 1;
     private static final int VIEW_TYPE_MESSAGE_RECEIVED = 2;
     private ArrayList<Message> messageLog = new ArrayList<>();
     private Listener listener;
 
-    // Allows to remember the last item shown on screen
+    // Allows adapter to remember the last item shown on screen
     private int lastPosition = -1;
 
     ChatroomAdapter(Listener listener) {
@@ -101,43 +115,84 @@ public class ChatroomAdapter extends RecyclerView.Adapter {
         TextView timestampTV;
         @BindView(R.id.message_tv)
         TextView messageTV;
-        @BindView(R.id.username_tv)
-        TextView usernameTV;
+        @BindView(R.id.profile_thumbnail_iv)
+        ImageView profileImage;
+
+        private Context context;
 
         MessageReceivedViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+            context = itemView.getContext();
         }
 
         void bind(final Message message, int position) {
             messageTV.setText(message.getMessage());
             timestampTV.setText(message.getTimeStamp());
-            usernameTV.setText(message.getSenderName());
+
+            loadProfileImage(message, position);
+
+            Log.i(TAG, "bind: RECEIVED CALLED");
+
+            itemView.setOnClickListener(view -> listener.onMessageClicked(message));
+
+            itemView.setOnLongClickListener(view -> {
+                listener.onMessageLongClicked(message);
+                return true;
+            });
+        }
+
+        void loadProfileImage(Message message, int position) {
+            if (position == 0) {
+                if (messageLog.get(position).getSenderId().equals(message.getSenderId())) {
+
+                    // Create a reference with an initial file path and name
+                    StorageReference pathReference = storageRef.child(message.getSenderId() + "_profile_img");
+
+                    pathReference.getDownloadUrl()
+                            .addOnSuccessListener(uri ->
+                                    Glide.with(context)
+                                            .load(uri)
+                                            .apply(RequestOptions.circleCropTransform()
+                                                    .placeholder(new ColorDrawable(Color.LTGRAY))
+                                                    .fallback(new ColorDrawable(Color.LTGRAY))
+                                            ).into(profileImage))
+                            .addOnFailureListener(e -> Log.e(TAG, "onFailure: " + e.getMessage()));
+
+                    profileImage.setVisibility(View.VISIBLE);
+                }
+            }
 
             if (position - 1 >= 0) {
                 if (messageLog.get(position - 1).getSenderId().equals(message.getSenderId())) {
-                    usernameTV.setVisibility(View.GONE);
+                    profileImage.setVisibility(View.INVISIBLE);
                 } else {
-                    usernameTV.setVisibility(View.VISIBLE);
+                    // Create a reference with an initial file path and name
+                    StorageReference pathReference = storageRef.child(message.getSenderId() + "_profile_img");
+
+                    pathReference.getDownloadUrl()
+                            .addOnSuccessListener(uri ->
+                                    Glide.with(context)
+                                            .load(uri)
+                                            .apply(RequestOptions.fitCenterTransform()
+                                                    .circleCrop()
+                                                    .placeholder(new ColorDrawable(Color.LTGRAY))
+                                                    .fallback(new ColorDrawable(Color.LTGRAY))
+                                            ).into(profileImage))
+                            .addOnFailureListener(e ->
+                                    Glide.with(context)
+                                    .load(new ColorDrawable(Color.BLACK))
+                                            .apply(RequestOptions.fitCenterTransform()
+                                                    .circleCrop()
+                                                    .placeholder(new ColorDrawable(Color.LTGRAY))
+                                                    .fallback(new ColorDrawable(Color.LTGRAY)))
+                                    .into(profileImage));
+
+                    profileImage.setVisibility(View.VISIBLE);
                 }
             }
-            Log.i(TAG, "bind: RECEIVED CALLED");
-
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    listener.onMessageClicked(message);
-                }
-            });
-
-            itemView.setOnLongClickListener(new OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    listener.onMessageLongClicked(message);
-                    return true;
-                }
-            });
         }
+
     }
 
     class MessageSentViewHolder extends RecyclerView.ViewHolder {
@@ -146,32 +201,76 @@ public class ChatroomAdapter extends RecyclerView.Adapter {
         TextView timestampTV;
         @BindView(R.id.message_tv)
         TextView messageTV;
+        @BindView(R.id.profile_thumbnail_iv)
+        ImageView profileImage;
+
+        private Context context;
 
         MessageSentViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+            context = itemView.getContext();
         }
 
         void bind(final Message message, int position) {
             messageTV.setText(message.getMessage());
             timestampTV.setText(message.getTimeStamp());
 
+            loadProfileImage(message, position);
+
             Log.i(TAG, "bind: SENT CALLED");
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    listener.onMessageClicked(message);
-                }
-            });
+            itemView.setOnClickListener(view -> listener.onMessageClicked(message));
 
-            itemView.setOnLongClickListener(new OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    listener.onMessageLongClicked(message);
-                    return true;
-                }
+            itemView.setOnLongClickListener(view -> {
+                listener.onMessageLongClicked(message);
+                return true;
             });
+        }
+
+        void loadProfileImage(Message message, int position) {
+            if (position == 0) {
+                if (messageLog.get(position).getSenderId().equals(message.getSenderId())) {
+
+                    // Create a reference with an initial file path and name
+                    StorageReference pathReference = storageRef.child(message.getSenderId() + "_profile_img");
+
+                    pathReference.getDownloadUrl()
+                            .addOnSuccessListener(uri ->
+                                    Glide.with(context)
+                                            .load(uri)
+                                            .apply(RequestOptions.fitCenterTransform()
+                                                    .circleCrop()
+                                                    .placeholder(new ColorDrawable(Color.LTGRAY))
+                                                    .fallback(new ColorDrawable(Color.LTGRAY))
+                                            ).into(profileImage))
+                            .addOnFailureListener(e -> Log.e(TAG, "onFailure: " + e.getMessage()));
+
+                    profileImage.setVisibility(View.VISIBLE);
+                }
+            }
+
+            if (position - 1 >= 0) {
+                if (messageLog.get(position - 1).getSenderId().equals(message.getSenderId())) {
+                    profileImage.setVisibility(View.INVISIBLE);
+                } else {
+                    // Create a reference with an initial file path and name
+                    StorageReference pathReference = storageRef.child(message.getSenderId() + "_profile_img");
+
+                    pathReference.getDownloadUrl()
+                            .addOnSuccessListener(uri ->
+                                    Glide.with(context)
+                                            .load(uri)
+                                            .apply(RequestOptions.fitCenterTransform()
+                                                    .circleCrop()
+                                                    .placeholder(new ColorDrawable(Color.LTGRAY))
+                                                    .fallback(new ColorDrawable(Color.LTGRAY))
+                                            ).into(profileImage))
+                            .addOnFailureListener(e -> Log.e(TAG, "onFailure: " + e.getMessage()));
+
+                    profileImage.setVisibility(View.VISIBLE);
+                }
+            }
         }
     }
 }

@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
@@ -14,8 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.bumptech.glide.Glide;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -32,8 +30,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.tronography.locationchat.utils.Constants.ResultCodes.*;
 import static com.tronography.locationchat.utils.Constants.ResultCodes.RESULT_LOAD_BACKGROUND_IMG;
+import static com.tronography.locationchat.utils.Constants.ResultCodes.RESULT_LOAD_PROFILE_IMG;
 import static com.tronography.locationchat.utils.SharedPrefsUtils.CURRENT_USER_ID;
 
 
@@ -41,6 +39,10 @@ public class UserProfileActivity extends AppCompatActivity implements UserProfil
         RetrieveUserListener {
 
     private static final String TAG = UserProfileActivity.class.getSimpleName();
+    public static final String BACKGROUND_IMG = "_background_img";
+    public static final String PROFILE_IMG = "_profile_img";
+    public static final String FIREBASE_URL_REF = "gs://locationchat-27912.appspot.com";
+    public final static String SENDER_ID_KEY = "sender_id";
 
     @BindView(R.id.header_username_tv)
     TextView headerUsernameTV;
@@ -53,8 +55,10 @@ public class UserProfileActivity extends AppCompatActivity implements UserProfil
     @BindView(R.id.profile_iv)
     ImageView profileImage;
 
+    @BindView(R.id.background_iv)
+    ImageView backgroundImage;
+
     private User user;
-    public final static String SENDER_ID_KEY = "sender_id";
 
     @Inject
     AppUtils appUtils;
@@ -65,7 +69,7 @@ public class UserProfileActivity extends AppCompatActivity implements UserProfil
 
     //creating reference to firebase storage
     FirebaseStorage storage = FirebaseStorage.getInstance();
-    StorageReference storageRef = storage.getReferenceFromUrl("gs://locationchat-27912.appspot.com");
+    StorageReference storageRef = storage.getReferenceFromUrl(FIREBASE_URL_REF);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,8 +95,8 @@ public class UserProfileActivity extends AppCompatActivity implements UserProfil
             showEditButton();
             disableDetailsEditText();
             presenter.saveChanges(
-                    headerUsernameTV.getText().toString(),
-                    bioDetailsET.getText().toString());
+                    headerUsernameTV.getText().toString().trim(),
+                    bioDetailsET.getText().toString().trim());
         }
     }
 
@@ -118,11 +122,10 @@ public class UserProfileActivity extends AppCompatActivity implements UserProfil
             if (resultCode == Activity.RESULT_OK) {
                 switch (requestCode) {
                     case RESULT_LOAD_PROFILE_IMG:
-                        //todo upload to firebase storage and display in ui
+                        uploadProfileImage(data);
                         break;
                     case RESULT_LOAD_BACKGROUND_IMG:
-                        uploadBackGroundImage(data);
-                        Uri bgImgUri = data.getData();
+                        uploadBackgroundImage(data);
                         break;
                 }
             } else {
@@ -133,35 +136,86 @@ public class UserProfileActivity extends AppCompatActivity implements UserProfil
         }
     }
 
-    public void uploadBackGroundImage(Intent data) {
-        Uri bgImgUri = data.getData();
+    public void uploadProfileImage(Intent data) {
+        Uri profileImageUri = data.getData();
 
-        if(bgImgUri != null) {
+        if (profileImageUri != null) {
             progressDialog.show();
 
-            StorageReference childRef = storageRef.child(CURRENT_USER_ID + "backgroundImage.jpg");
+            StorageReference childRef = storageRef.child(CURRENT_USER_ID + PROFILE_IMG);
             //uploading the image
-            UploadTask uploadTask = childRef.putFile(bgImgUri);
+            UploadTask uploadTask = childRef.putFile(profileImageUri);
 
-            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    progressDialog.dismiss();
-                    Toast.makeText(UserProfileActivity.this, "Upload successful", Toast.LENGTH_SHORT).show();
+            uploadTask.addOnSuccessListener(taskSnapshot -> {
+                progressDialog.dismiss();
+
+                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+
+                if (downloadUrl != null) {
+                    presenter.saveProfilePhoto(downloadUrl.toString());
                 }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    progressDialog.dismiss();
-                    Toast.makeText(UserProfileActivity.this, "Upload Failed -> " + e, Toast.LENGTH_SHORT).show();
-                }
+
+                loadProfilePhoto(downloadUrl);
+
+
+                Toast.makeText(UserProfileActivity.this, "Upload successful", Toast.LENGTH_SHORT).show();
+            }).addOnFailureListener(e -> {
+                progressDialog.dismiss();
+                Toast.makeText(UserProfileActivity.this, "Upload Failed -> " + e, Toast.LENGTH_SHORT).show();
             });
-        }
-        else {
+        } else {
             Toast.makeText(UserProfileActivity.this, "Select an image", Toast.LENGTH_SHORT).show();
         }
     }
 
+    public void uploadBackgroundImage(Intent data) {
+        Uri backgroundImageUri = data.getData();
+
+        if (backgroundImageUri != null) {
+            progressDialog.show();
+
+            //creating a unique identifier
+            StorageReference childRef = storageRef.child(CURRENT_USER_ID + BACKGROUND_IMG);
+            UploadTask uploadTask = childRef.putFile(backgroundImageUri);
+
+            uploadTask.addOnSuccessListener(taskSnapshot -> {
+                progressDialog.dismiss();
+
+                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+
+                if (downloadUrl != null) {
+                    presenter.saveBackgroundPhoto(downloadUrl.toString());
+                }
+
+                loadBackgroundPhoto(downloadUrl);
+                Toast.makeText(UserProfileActivity.this, "Upload successful", Toast.LENGTH_SHORT).show();
+            }).addOnFailureListener(e -> {
+
+                progressDialog.dismiss();
+                Toast.makeText(UserProfileActivity.this, "Upload Failed -> " + e, Toast.LENGTH_SHORT).show();
+            });
+        } else {
+            Toast.makeText(UserProfileActivity.this, "Select an image", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void loadProfilePhoto(Uri downloadUrl) {
+        Glide.with(UserProfileActivity.this)
+                .load(downloadUrl)
+                .into(profileImage);
+    }
+
+    private void loadBackgroundPhoto(Uri downloadUrl) {
+        Glide.with(UserProfileActivity.this)
+                .load(downloadUrl)
+                .into(backgroundImage);
+    }
+
+    public void loadBackgroundPhoto(String downloadUrl) {
+        Glide.with(UserProfileActivity.this)
+                .load(downloadUrl)
+                .into(backgroundImage);
+    }
 
     private void showEditButton() {
         editOptionTV.setText(R.string.edit);
@@ -177,6 +231,13 @@ public class UserProfileActivity extends AppCompatActivity implements UserProfil
 
     private boolean isEditDisabled() {
         return editOptionTV.getText().equals(getString(R.string.edit));
+    }
+
+    @Override
+    public void loadProfilePhoto(String uri) {
+        Glide.with(UserProfileActivity.this)
+                .load(uri)
+                .into(profileImage);
     }
 
 

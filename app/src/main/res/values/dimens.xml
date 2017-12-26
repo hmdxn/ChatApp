@@ -17,7 +17,7 @@
     <dimen name="sms_rv_margin_start">16dp</dimen>
     <dimen name="sms_rv_margin_end">16dp</dimen>
     <dimen name="time_date_text_size">10sp</dimen>
-    <dimen name="sender_id_text_size">10sp</dimen>
+    <dimen name="sender_id_text_size">12sp</dimen>
     <dimen name="type_text_size">16sp</dimen>
     <dimen name="card_chat_margin_btm">2dp</dimen>
     <dimen name="card_chat_corner_radius">10dp</dimen>

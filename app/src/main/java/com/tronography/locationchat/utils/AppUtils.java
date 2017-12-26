@@ -33,11 +33,7 @@ public class AppUtils {
         this.mContext = context;
     }
 
-    /**
-     * Description : Check if user is online or not
-     *
-     * @return true if online else false
-     */
+
     public boolean isOnline(View v) {
         ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
@@ -48,41 +44,20 @@ public class AppUtils {
         return false;
     }
 
-
-    /**
-     * Description : Hide the soft keyboard
-     *
-     * @param view : Pass the current view
-     */
     public void hideSoftKeyboard(View view) {
         InputMethodManager inputMethodManager = (InputMethodManager) mContext.getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-    /**
-     * Description: Clears text from the EditText input field
-     *
-     * @param view : pass the EditText
-     */
-    public void clearText(EditText view) {
+
+    public void clearEditText(EditText view) {
         view.setText("");
     }
 
-    /**
-     * Show snackbar
-     *
-     * @param view view clicked
-     * @param text text to be displayed on snackbar
-     */
     public void showSnackBar(View view, String text) {
         Snackbar.make(view, text, Snackbar.LENGTH_LONG).show();
     }
 
-    /**
-     * Show snackbar
-     *
-     * @param text text to be displayed on Toast
-     */
     public void showToast(String text) {
         Toast.makeText(mContext, text, Toast.LENGTH_SHORT).show();
     }
@@ -107,11 +82,6 @@ public class AppUtils {
         return true;
     }
 
-    /**
-     * check if user has enabled Gps of device
-     *
-     * @return true or false depending upon device Gps status
-     */
     public boolean isGpsEnabled() {
         final LocationManager manager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
         return manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
